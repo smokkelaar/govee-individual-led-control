@@ -59,6 +59,8 @@ from .h70b3_protocol import RGB, parse_color
 from .model_registry import get_model_spec
 from .runtime import GoveeRuntime
 
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
 _TARGET_FIELD = {vol.Optional(ATTR_CONFIG_ENTRY_ID): str}
 _COMMIT_FIELD = {vol.Optional(ATTR_COMMIT, default=True): cv.boolean}
 _BRIGHTNESS_FIELD = {
