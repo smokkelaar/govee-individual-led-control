@@ -1,0 +1,57 @@
+{
+  "title": "Govee Individual LED Control",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Choose Govee model and full-control transport",
+        "description": "Only transports verified for individual elements are used. Matter can provide basic device control but not individual panels or LEDs in this integration.",
+        "menu_options": {
+          "h6069": "H6069 Mini Panel Lights — full control: LAN; Matter: basic only",
+          "h70b3": "H70B3 Curtain Lights 2 — full control: Bluetooth/proxy; LAN and Matter: basic only"
+        }
+      },
+      "h6069": {
+        "title": "Add H6069 via local LAN",
+        "description": "Full panel control is physically verified through UDP LAN. Enable LAN Control in Govee Home. Setup sends no pattern.",
+        "data": {
+          "host": "Device IP address",
+          "name": "Name",
+          "panel_count": "Number of physical panels"
+        }
+      },
+      "h70b3": {
+        "title": "Add H70B3 via Bluetooth",
+        "description": "Full 520-LED control requires a local Bluetooth adapter or an active ESPHome Bluetooth proxy. Setup sends no image.",
+        "data": {
+          "address": "Bluetooth MAC address",
+          "name": "Name"
+        }
+      },
+      "confirm": {
+        "title": "Add {name}",
+        "description": "Use discovered H70B3 at {address} through Bluetooth or an active proxy? No image is sent during setup."
+      }
+    },
+    "error": {
+      "invalid_ip": "Enter a valid IP address.",
+      "invalid_address": "Enter a valid Bluetooth MAC address."
+    },
+    "abort": {
+      "already_configured": "This Govee device is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Model options",
+        "description": "Changes reload only this device. Reloading never transmits a physical frame.",
+        "data": {
+          "panel_count": "Number of H6069 panels",
+          "create_pixel_entities": "Create 520 individual H70B3 LED entities",
+          "debounce_ms": "Combine individual changes for (ms)",
+          "idle_disconnect_seconds": "Disconnect Bluetooth after inactivity (s)"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,189 @@
+set_elements:
+  name: Elementen instellen
+  description: Wijzig meerdere panelen of leds op protocolindex in één complete frame-update.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      description: Alleen nodig wanneer meer dan één Govee Advanced-apparaat geladen is.
+      selector:
+        text:
+    elements:
+      name: Elementen
+      description: Lijst met index en kleur (#RRGGBB of [r,g,b]). H6069 gebruikt paneel-ID 0..N-1; H70B3 gebruikt row-major ledindex 0..519.
+      required: true
+      example:
+        - index: 5
+          color: "#ff0000"
+      selector:
+        object:
+    replace:
+      name: Huidig frame vervangen
+      description: Zet alle niet genoemde elementen uit voordat de wijzigingen worden toegepast.
+      default: false
+      selector:
+        boolean:
+    brightness_percent:
+      name: Helderheid
+      description: Optionele globale schaling van 1 tot 100 procent.
+      selector:
+        number:
+          min: 1
+          max: 100
+          mode: slider
+    commit:
+      name: Direct verzenden
+      default: true
+      selector:
+        boolean:
+
+set_pixels:
+  name: H70B3-pixels instellen
+  description: Wijzig meerdere x/y-pixels van een H70B3-gordijn in één frame.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      selector:
+        text:
+    pixels:
+      name: Pixels
+      description: Lijst met nulgebaseerde x, y en kleur.
+      required: true
+      example:
+        - x: 0
+          y: 0
+          color: "#ff0000"
+        - x: 19
+          y: 25
+          color: [0, 0, 255]
+      selector:
+        object:
+    replace:
+      name: Huidig frame vervangen
+      default: false
+      selector:
+        boolean:
+    brightness_percent:
+      name: Helderheid
+      selector:
+        number:
+          min: 1
+          max: 100
+          mode: slider
+    commit:
+      name: Direct verzenden
+      default: true
+      selector:
+        boolean:
+
+set_frame:
+  name: Compleet frame instellen
+  description: Vervang alle elementen; 40 kleuren voor de geteste H6069-opstelling of 520 row-major kleuren voor H70B3.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      selector:
+        text:
+    colors:
+      name: Kleuren
+      description: Exact het geconfigureerde aantal #RRGGBB-waarden of RGB-lijsten.
+      required: true
+      selector:
+        object:
+    brightness_percent:
+      name: Helderheid
+      selector:
+        number:
+          min: 1
+          max: 100
+          mode: slider
+    commit:
+      name: Direct verzenden
+      default: true
+      selector:
+        boolean:
+
+apply_level:
+  name: Sensorwaarde visualiseren
+  description: Zet een genormaliseerde waarde van 0..100 om in een statisch lichtbeeld. Geschikt voor geluid, beweging, afstand, energie of andere HA-sensoren.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      selector:
+        text:
+    level:
+      name: Niveau
+      description: Genormaliseerde sensorwaarde van 0 tot en met 100.
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100
+          mode: slider
+    style:
+      name: Stijl
+      default: bar
+      selector:
+        select:
+          options:
+            - label: Balkmeter
+              value: bar
+            - label: Bewegende positie
+              value: position
+            - label: Kleurpuls
+              value: pulse
+    commit:
+      name: Direct verzenden
+      default: true
+      selector:
+        boolean:
+
+clear:
+  name: Alle elementen wissen
+  description: Zet het complete schaduwframe zwart en verzend het optioneel direct.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      selector:
+        text:
+    commit:
+      name: Direct verzenden
+      default: true
+      selector:
+        boolean:
+
+commit:
+  name: Wachtend frame verzenden
+  description: Verzend de meest recente gecombineerde toestand meteen.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      selector:
+        text:
+
+show_demo:
+  name: Bewezen identificatiedemo
+  description: H6069 toont paneel 5 rood op blauw; H70B3 toont het fysiek bewezen rode/blauwe X.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      selector:
+        text:
+    commit:
+      name: Direct verzenden
+      default: true
+      selector:
+        boolean:
+
+show_orientation:
+  name: H70B3-oriëntatiemarkeringen
+  description: Toon rode, groene, blauwe en witte hoekmarkeringen. Alleen beschikbaar voor H70B3.
+  fields:
+    config_entry_id:
+      name: Config-entry-ID
+      selector:
+        text:
+    commit:
+      name: Direct verzenden
+      default: true
+      selector:
+        boolean:

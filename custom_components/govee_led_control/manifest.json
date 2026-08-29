@@ -1,0 +1,19 @@
+{
+  "domain": "govee_led_control",
+  "name": "Govee Individual LED Control",
+  "bluetooth": [
+    {
+      "connectable": true,
+      "local_name": "Govee_H70B3_*"
+    }
+  ],
+  "codeowners": ["@smokkelaar"],
+  "config_flow": true,
+  "dependencies": ["bluetooth_adapters"],
+  "documentation": "https://github.com/smokkelaar/govee-individual-led-control",
+  "integration_type": "device",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/smokkelaar/govee-individual-led-control/issues",
+  "requirements": [],
+  "version": "0.2.0"
+}

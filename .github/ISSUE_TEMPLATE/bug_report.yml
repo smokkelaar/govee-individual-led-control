@@ -1,0 +1,62 @@
+name: Bug report
+description: Report reproducible behavior on supported Govee hardware
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Remove API keys, private IP addresses, unique Bluetooth addresses and unrelated packet data before submitting.
+  - type: dropdown
+    id: model
+    attributes:
+      label: Govee model
+      options:
+        - H6069 Mini Panel Lights
+        - H70B3 Curtain Lights 2
+        - Other or new model
+    validations:
+      required: true
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport
+      options:
+        - LAN
+        - Direct Bluetooth
+        - ESPHome Bluetooth proxy
+        - Matter or basic Govee integration
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Integration, Home Assistant and ESPHome versions where relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and physical observation
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Redacted diagnostics or logs
+      render: text
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy check
+      options:
+        - label: I removed credentials, unique device addresses and private network details.
+          required: true

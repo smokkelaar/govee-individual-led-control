@@ -1,0 +1,57 @@
+{
+  "title": "Govee Individual LED Control",
+  "config": {
+    "step": {
+      "user": {
+        "title": "Kies Govee-model en transport voor volledige controle",
+        "description": "Alleen fysiek bewezen transporten worden gebruikt voor individuele elementen. Matter kan basisbediening leveren, maar binnen deze integratie geen afzonderlijke panelen of leds.",
+        "menu_options": {
+          "h6069": "H6069 Mini Panel Lights — volledig: LAN; Matter: alleen basis",
+          "h70b3": "H70B3 Curtain Lights 2 — volledig: Bluetooth/proxy; LAN en Matter: alleen basis"
+        }
+      },
+      "h6069": {
+        "title": "H6069 via lokaal LAN toevoegen",
+        "description": "Volledige paneelcontrole via UDP-LAN is fysiek bewezen. Schakel LAN Control in Govee Home in. Tijdens toevoegen wordt geen patroon verzonden.",
+        "data": {
+          "host": "IP-adres van apparaat",
+          "name": "Naam",
+          "panel_count": "Aantal fysieke panelen"
+        }
+      },
+      "h70b3": {
+        "title": "H70B3 via Bluetooth toevoegen",
+        "description": "Volledige controle over 520 leds vereist een lokale Bluetooth-adapter of actieve ESPHome Bluetooth-proxy. Tijdens toevoegen wordt geen beeld verzonden.",
+        "data": {
+          "address": "Bluetooth MAC-adres",
+          "name": "Naam"
+        }
+      },
+      "confirm": {
+        "title": "{name} toevoegen",
+        "description": "De gevonden H70B3 op {address} via Bluetooth of actieve proxy gebruiken? Tijdens toevoegen wordt geen beeld verzonden."
+      }
+    },
+    "error": {
+      "invalid_ip": "Vul een geldig IP-adres in.",
+      "invalid_address": "Vul een geldig Bluetooth MAC-adres in."
+    },
+    "abort": {
+      "already_configured": "Dit Govee-apparaat is al geconfigureerd."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Modelopties",
+        "description": "Wijzigingen herladen alleen dit apparaat. Herladen verzendt nooit automatisch een fysiek frame.",
+        "data": {
+          "panel_count": "Aantal H6069-panelen",
+          "create_pixel_entities": "Maak 520 afzonderlijke H70B3-ledentiteiten",
+          "debounce_ms": "Voeg losse wijzigingen samen gedurende (ms)",
+          "idle_disconnect_seconds": "Verbreek Bluetooth na inactiviteit (s)"
+        }
+      }
+    }
+  }
+}

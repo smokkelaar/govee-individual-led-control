@@ -1,0 +1,34 @@
+# Optionele vierde view. Vereist HACS frontendkaart Auto Entities.
+# Controleer eerst of de echte ids het patroon light.h70b3_led_r*_k* volgen.
+
+- title: H70B3 520 leds
+  path: govee-h70b3-grid
+  icon: mdi:grid
+  panel: true
+  cards:
+    - type: vertical-stack
+      cards:
+        - type: markdown
+          content: >-
+            **20 × 26 logische matrix.** Tik op een led voor kleur en helderheid.
+            De tegelkleur volgt Home Assistants optimistische toestand. Gebruik de
+            horizontale/verticale spiegelswitch voor een anders opgehangen gordijn.
+        - type: custom:auto-entities
+          card:
+            type: grid
+            columns: 20
+            square: true
+          card_param: cards
+          filter:
+            include:
+              - entity_id: "light.h70b3_led_r*_k*"
+                options:
+                  type: button
+                  show_name: false
+                  show_state: false
+                  tap_action:
+                    action: more-info
+                  hold_action:
+                    action: toggle
+          sort:
+            method: entity_id

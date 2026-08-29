@@ -1,0 +1,59 @@
+# Voorbeelden voor Ontwikkelaarstools > Acties. Niets uit dit bestand start vanzelf.
+# Laat config_entry_id weg wanneer precies één Govee Advanced-apparaat geladen is.
+
+# Eén H6069-paneel rood, rest van het actuele frame behouden.
+action: govee_led_control.set_elements
+data:
+  config_entry_id: VERVANG_DOOR_H6069_CONFIG_ENTRY_ID
+  elements:
+    - index: 5
+      color: "#ff0000"
+  replace: false
+  commit: true
+
+---
+# H70B3: alleen vier logische hoekpixels tonen.
+action: govee_led_control.set_pixels
+data:
+  config_entry_id: VERVANG_DOOR_H70B3_CONFIG_ENTRY_ID
+  pixels:
+    - {x: 0, y: 0, color: "#ff0000"}
+    - {x: 19, y: 0, color: "#00ff00"}
+    - {x: 0, y: 25, color: "#0000ff"}
+    - {x: 19, y: 25, color: "#ffffff"}
+  replace: true
+  brightness_percent: 100
+  commit: true
+
+---
+# Universele 0..100-test voor ieder ondersteund model.
+action: govee_led_control.apply_level
+data:
+  config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+  level: 65
+  style: bar
+  commit: true
+
+---
+# Wijzigingen samenstellen en pas daarna één keer verzenden.
+action: govee_led_control.set_elements
+data:
+  config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+  elements:
+    - {index: 0, color: "#ff0000"}
+  replace: false
+  commit: false
+
+---
+action: govee_led_control.set_elements
+data:
+  config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+  elements:
+    - {index: 1, color: "#00ff00"}
+  replace: false
+  commit: false
+
+---
+action: govee_led_control.commit
+data:
+  config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID

@@ -1,0 +1,182 @@
+# Voeg deze views later toe onder het bestaande dashboard Lichtbediening.
+# Controleer eerst de echte entity-id's; HA kan bij bestaande oude ids een _2 toevoegen.
+# Dit bestand gebruikt uitsluitend standaard Home Assistant-kaarten.
+
+- title: Govee
+  path: govee
+  icon: mdi:led-strip-variant
+  type: sections
+  sections:
+    - type: grid
+      cards:
+        - type: heading
+          heading: Transport en mogelijkheden
+          icon: mdi:connection
+        - type: entities
+          entities:
+            - entity: sensor.h6069_transport
+              name: H6069 volledige controle
+            - entity: sensor.h70b3_transport
+              name: H70B3 volledige controle
+        - type: markdown
+          content: >-
+            **H6069:** individuele panelen via LAN.  
+            **H70B3:** individuele leds via Bluetooth of actieve proxy.  
+            Matter is voor beide alleen basisbediening, niet per element.
+    - type: grid
+      cards:
+        - type: heading
+          heading: Snelle tests
+          icon: mdi:test-tube
+        - type: tile
+          entity: button.h6069_demo
+        - type: tile
+          entity: button.h6069_clear
+        - type: tile
+          entity: button.h70b3_demo
+        - type: tile
+          entity: button.h70b3_orientation
+        - type: tile
+          entity: button.h70b3_clear
+
+- title: H6069 panelen
+  path: govee-h6069
+  icon: mdi:view-grid-plus
+  type: sections
+  max_columns: 3
+  sections:
+    - type: grid
+      cards:
+        - type: heading
+          heading: Algemeen en sensordemo
+          icon: mdi:tune-variant
+        - type: tile
+          entity: sensor.h6069_transport
+        - type: tile
+          entity: select.h6069_visual_style
+        - type: tile
+          entity: number.h6069_visual_level
+          features:
+            - type: numeric-input
+              style: slider
+        - type: tile
+          entity: button.h6069_demo
+        - type: tile
+          entity: button.h6069_clear
+    - type: grid
+      cards:
+        - type: heading
+          heading: Panelen 00–19
+          icon: mdi:shape-square-rounded-plus
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - light.h6069_paneel_00
+            - light.h6069_paneel_01
+            - light.h6069_paneel_02
+            - light.h6069_paneel_03
+            - light.h6069_paneel_04
+            - light.h6069_paneel_05
+            - light.h6069_paneel_06
+            - light.h6069_paneel_07
+            - light.h6069_paneel_08
+            - light.h6069_paneel_09
+            - light.h6069_paneel_10
+            - light.h6069_paneel_11
+            - light.h6069_paneel_12
+            - light.h6069_paneel_13
+            - light.h6069_paneel_14
+            - light.h6069_paneel_15
+            - light.h6069_paneel_16
+            - light.h6069_paneel_17
+            - light.h6069_paneel_18
+            - light.h6069_paneel_19
+    - type: grid
+      cards:
+        - type: heading
+          heading: Panelen 20–39
+          icon: mdi:shape-square-rounded-plus
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - light.h6069_paneel_20
+            - light.h6069_paneel_21
+            - light.h6069_paneel_22
+            - light.h6069_paneel_23
+            - light.h6069_paneel_24
+            - light.h6069_paneel_25
+            - light.h6069_paneel_26
+            - light.h6069_paneel_27
+            - light.h6069_paneel_28
+            - light.h6069_paneel_29
+            - light.h6069_paneel_30
+            - light.h6069_paneel_31
+            - light.h6069_paneel_32
+            - light.h6069_paneel_33
+            - light.h6069_paneel_34
+            - light.h6069_paneel_35
+            - light.h6069_paneel_36
+            - light.h6069_paneel_37
+            - light.h6069_paneel_38
+            - light.h6069_paneel_39
+
+- title: H70B3 gordijn
+  path: govee-h70b3
+  icon: mdi:blinds-open
+  type: sections
+  max_columns: 3
+  sections:
+    - type: grid
+      cards:
+        - type: heading
+          heading: Matrix en verbinding
+          icon: mdi:led-on
+        - type: tile
+          entity: light.h70b3_matrix
+          features:
+            - type: light-brightness
+        - type: tile
+          entity: sensor.h70b3_transport
+        - type: tile
+          entity: switch.h70b3_spiegel_horizontal
+        - type: tile
+          entity: switch.h70b3_spiegel_vertical
+    - type: grid
+      cards:
+        - type: heading
+          heading: Test en sensorvisualisatie
+          icon: mdi:animation-outline
+        - type: tile
+          entity: select.h70b3_visual_style
+        - type: tile
+          entity: number.h70b3_visual_level
+          features:
+            - type: numeric-input
+              style: slider
+        - type: tile
+          entity: button.h70b3_orientation
+        - type: tile
+          entity: button.h70b3_demo
+        - type: tile
+          entity: button.h70b3_clear
+    - type: grid
+      cards:
+        - type: heading
+          heading: Logische hoekpixels
+          icon: mdi:crop-square
+        - type: tile
+          entity: light.h70b3_led_r01_k01
+          name: Linksboven
+        - type: tile
+          entity: light.h70b3_led_r01_k20
+          name: Rechtsboven
+        - type: tile
+          entity: light.h70b3_led_r26_k01
+          name: Linksonder
+        - type: tile
+          entity: light.h70b3_led_r26_k20
+          name: Rechtsonder
+        - type: markdown
+          content: >-
+            De optionele tab **H70B3 520 leds** toont de hele fysieke matrix.
+            Gebruik een tik voor de kleurendialoog en de spiegelknoppen wanneer het doek anders hangt.

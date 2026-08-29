@@ -1,0 +1,103 @@
+# Veilige Home Assistant packagevoorbeelden voor externe sensoren.
+# Alle automations zijn bewust UIT bij eerste laden. Vervang entity_id en
+# config_entry_id, controleer de berekening en schakel daarna één demo handmatig in.
+
+automation:
+  - id: govee_demo_geluidsmeter
+    alias: "Govee demo - geluidsniveau als balk"
+    description: "Normaliseert 30..100 dB naar 0..100, maximaal eens per 3 seconden."
+    initial_state: false
+    mode: single
+    trigger:
+      - platform: time_pattern
+        seconds: "/3"
+    condition:
+      - condition: template
+        value_template: >-
+          {{ states('sensor.geluidsniveau') not in ['unknown', 'unavailable', 'none'] }}
+    action:
+      - service: govee_led_control.apply_level
+        data:
+          config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+          level: >-
+            {% set db = states('sensor.geluidsniveau') | float(30) %}
+            {% set n = ((db - 30) * 100 / 70) | round(0) | int %}
+            {{ [0, [100, n] | min] | max }}
+          style: bar
+          commit: true
+
+  - id: govee_demo_beweging
+    alias: "Govee demo - beweging als korte kleurpuls"
+    description: "Toont bij beweging niveau 100 en wist het beeld als beweging eindigt."
+    initial_state: false
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.beweging_woonkamer
+        to:
+          - "on"
+          - "off"
+    action:
+      - choose:
+          - conditions: "{{ trigger.to_state.state == 'on' }}"
+            sequence:
+              - service: govee_led_control.apply_level
+                data:
+                  config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+                  level: 100
+                  style: pulse
+                  commit: true
+        default:
+          - service: govee_led_control.clear
+            data:
+              config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+              commit: true
+
+  - id: govee_demo_afstand
+    alias: "Govee demo - mmWave afstand als positie"
+    description: "Normaliseert 0..5 meter naar een bewegende positie, eens per 3 seconden."
+    initial_state: false
+    mode: single
+    trigger:
+      - platform: time_pattern
+        seconds: "/3"
+    condition:
+      - condition: template
+        value_template: >-
+          {{ states('sensor.mmwave_afstand') not in ['unknown', 'unavailable', 'none'] }}
+    action:
+      - service: govee_led_control.apply_level
+        data:
+          config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+          level: >-
+            {% set meter = states('sensor.mmwave_afstand') | float(0) %}
+            {% set n = (meter * 20) | round(0) | int %}
+            {{ [0, [100, n] | min] | max }}
+          style: position
+          commit: true
+
+  - id: govee_demo_media_volume
+    alias: "Govee demo - mediavolume als balk"
+    description: "Leest volume_level 0..1 uit een media_player, eens per 3 seconden."
+    initial_state: false
+    mode: single
+    trigger:
+      - platform: time_pattern
+        seconds: "/3"
+    condition:
+      - condition: template
+        value_template: >-
+          {{ state_attr('media_player.woonkamer', 'volume_level') is number }}
+    action:
+      - service: govee_led_control.apply_level
+        data:
+          config_entry_id: VERVANG_DOOR_CONFIG_ENTRY_ID
+          level: >-
+            {{ (state_attr('media_player.woonkamer', 'volume_level') | float(0) * 100) | round(0) | int }}
+          style: bar
+          commit: true
+
+# Waarom geen automatische microfoondemo:
+# Home Assistant heeft alleen een bruikbaar audioniveau wanneer er werkelijk een
+# geluidsniveausensor bestaat. De officiële Govee-muziekmodus zelf is nog geen
+# bewezen raw commando in deze integratie. Er wordt daarom niets gefingeerd.

@@ -1,0 +1,40 @@
+name: Feature or model request
+description: Propose deeper control, a new model adapter or a sensor visualization
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: input
+    id: model
+    attributes:
+      label: Exact Govee model/SKU
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Individual-element control goal
+      description: Describe the panel, segment or LED behavior you want.
+    validations:
+      required: true
+  - type: dropdown
+    id: hardware
+    attributes:
+      label: Hardware available for physical verification
+      options:
+        - I own the device and can run controlled tests
+        - Someone else can physically verify
+        - No hardware is currently available
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Existing official documentation or redacted protocol evidence
+  - type: checkboxes
+    id: authorization
+    attributes:
+      label: Authorization
+      options:
+        - label: Any proposed protocol testing will be performed only on owned or authorized hardware.
+          required: true
