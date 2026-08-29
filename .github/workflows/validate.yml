@@ -26,7 +26,7 @@ jobs:
       contents: read
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: Home Assistant integration validation
@@ -39,7 +39,7 @@ jobs:
       contents: read
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7.0.0
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
       - name: Set up Python
