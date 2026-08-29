@@ -20,8 +20,8 @@ The integration never silently substitutes Matter or cloud control for individua
 ## Highlights
 
 - one RGB light entity per H6069 panel;
-- read-only retrieval of the learned H6069 Shape Recognition topology, exposed
-  as a numbered grid and structured panel coordinates;
+- strict H6069 Shape Recognition topology import, exposed as a numbered grid
+  and structured panel coordinates, plus an experimental read-only LAN probe;
 - one H70B3 matrix light and, optionally, 520 individual RGB light entities;
 - complete-frame updates with debouncing to combine rapid changes;
 - persistent horizontal and vertical curtain mirroring;
@@ -33,14 +33,18 @@ The integration never silently substitutes Matter or cloud control for individua
 
 The state is optimistic. H6069 UDP has no acknowledgement or visual-state readback. H70B3 acknowledges the Bluetooth upload and activation, but the visible pixel colors are not read back.
 
-H6069 setup and reload do not query the device. Press **Paneelindeling
-uitlezen** when you explicitly want to read the current shape. This read-only
-request changes no color, brightness or saved Govee configuration. The related
-sensor exposes the zero-based number grid, panel coordinates, connections and a
-fingerprint, so the dashboard follows a newly recognized shape without manual
-renumbering. Home Assistant restores the last successful map after a restart;
-press the button again only after changing Shape Recognition or when you want to
-verify the live device.
+H6069 setup and reload do not query the device. A captured Shape Recognition
+Base64 value can be pasted under **Configure → Shape Recognition topology**;
+the options flow strictly validates its header, length, checksum, tree and panel
+count before storing it. This changes no color, brightness or saved Govee
+configuration. The related sensor exposes the zero-based number grid, panel
+coordinates, connections and a fingerprint.
+
+**Paneelindeling via LAN proberen** is a read-only LAN probe. H6069 replies through the
+Govee multicast group on UDP 4002, but the tested firmware normally returns a
+six-byte runtime `pt`, not the 129-byte learned map. The button therefore cannot
+replace an import on that firmware and now reports this distinction explicitly.
+The last validated map remains available after a failed probe or restart.
 
 ## HACS installation
 

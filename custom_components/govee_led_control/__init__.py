@@ -31,6 +31,7 @@ from .const import (
     CONF_IDLE_DISCONNECT_SECONDS,
     CONF_MODEL,
     CONF_PANEL_COUNT,
+    CONF_TOPOLOGY_PT,
     DATA_RUNTIMES,
     DATA_SERVICES_REGISTERED,
     DEFAULT_H6069_DEBOUNCE_MS,
@@ -313,6 +314,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             debounce_ms=entry.options.get(
                 CONF_DEBOUNCE_MS, DEFAULT_H6069_DEBOUNCE_MS
             ),
+            topology_pt=str(entry.options.get(CONF_TOPOLOGY_PT, "")).strip(),
         )
         platforms = (
             Platform.BUTTON,

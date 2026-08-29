@@ -34,19 +34,26 @@
     },
     "error": {
       "invalid_ip": "Enter a valid IP address.",
-      "invalid_address": "Enter a valid Bluetooth MAC address."
+      "invalid_address": "Enter a valid Bluetooth MAC address.",
+      "invalid_topology": "This is not a valid H6069 Shape Recognition topology.",
+      "topology_count_mismatch": "The imported topology has a different panel count."
     },
     "abort": {
       "already_configured": "This Govee device is already configured."
     }
   },
   "options": {
+    "error": {
+      "invalid_topology": "This is not a valid H6069 Shape Recognition topology.",
+      "topology_count_mismatch": "The imported topology has a different panel count."
+    },
     "step": {
       "init": {
         "title": "Model options",
-        "description": "Changes reload only this device. Reloading never transmits a physical frame.",
+        "description": "Changes reload only this device. Reloading never transmits a physical frame. For H6069, an optional captured Shape Recognition Base64 value is strictly validated before use.",
         "data": {
           "panel_count": "Number of H6069 panels",
+          "topology_pt": "Shape Recognition topology (Base64, optional)",
           "create_pixel_entities": "Create 520 individual H70B3 LED entities",
           "debounce_ms": "Combine individual changes for (ms)",
           "idle_disconnect_seconds": "Disconnect Bluetooth after inactivity (s)"

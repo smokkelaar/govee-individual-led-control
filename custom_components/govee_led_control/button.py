@@ -93,11 +93,11 @@ class GoveeCommandButton(ButtonEntity):
 
 
 class H6069TopologyRefreshButton(ButtonEntity):
-    """Explicitly request the read-only Shape Recognition configuration."""
+    """Explicitly probe whether firmware exposes topology through LAN status."""
 
     _attr_has_entity_name = True
     _attr_should_poll = False
-    _attr_name = "Paneelindeling uitlezen"
+    _attr_name = "Paneelindeling via LAN proberen"
     _attr_icon = "mdi:map-search-outline"
 
     def __init__(self, runtime: GoveeRuntime) -> None:

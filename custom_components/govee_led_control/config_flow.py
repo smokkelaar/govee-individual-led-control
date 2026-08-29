@@ -23,6 +23,7 @@ from .const import (
     CONF_IDLE_DISCONNECT_SECONDS,
     CONF_MODEL,
     CONF_PANEL_COUNT,
+    CONF_TOPOLOGY_PT,
     CONF_TRANSPORT,
     DEFAULT_CREATE_PIXEL_ENTITIES,
     DEFAULT_H6069_DEBOUNCE_MS,
@@ -41,6 +42,7 @@ from .const import (
     TRANSPORT_BLUETOOTH,
     TRANSPORT_LAN,
 )
+from .h6069_topology import H6069TopologyError, decode_topology_pt
 
 _MAC_PATTERN = re.compile(r"^(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$")
 
@@ -193,11 +195,26 @@ class GoveeAdvancedOptionsFlow(OptionsFlow):
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
-        if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
-
         options = self._entry.options
         model = self._entry.data[CONF_MODEL]
+        errors: dict[str, str] = {}
+        if user_input is not None and model == MODEL_H6069:
+            topology_pt = str(user_input.get(CONF_TOPOLOGY_PT, "")).strip()
+            user_input[CONF_TOPOLOGY_PT] = topology_pt
+            if topology_pt:
+                try:
+                    topology = decode_topology_pt(
+                        topology_pt,
+                        source="validated manual Shape Recognition import",
+                    )
+                except H6069TopologyError:
+                    errors[CONF_TOPOLOGY_PT] = "invalid_topology"
+                else:
+                    if topology.panel_count != int(user_input[CONF_PANEL_COUNT]):
+                        errors[CONF_TOPOLOGY_PT] = "topology_count_mismatch"
+        if user_input is not None and not errors:
+            return self.async_create_entry(title="", data=user_input)
+
         if model == MODEL_H6069:
             schema = vol.Schema(
                 {
@@ -219,6 +236,10 @@ class GoveeAdvancedOptionsFlow(OptionsFlow):
                             CONF_DEBOUNCE_MS, DEFAULT_H6069_DEBOUNCE_MS
                         ),
                     ): vol.All(vol.Coerce(int), vol.Range(min=50, max=2000)),
+                    vol.Optional(
+                        CONF_TOPOLOGY_PT,
+                        default=options.get(CONF_TOPOLOGY_PT, ""),
+                    ): str,
                 }
             )
         else:
@@ -246,4 +267,6 @@ class GoveeAdvancedOptionsFlow(OptionsFlow):
                     ): vol.All(vol.Coerce(int), vol.Range(min=3, max=120)),
                 }
             )
-        return self.async_show_form(step_id="init", data_schema=schema)
+        return self.async_show_form(
+            step_id="init", data_schema=schema, errors=errors
+        )

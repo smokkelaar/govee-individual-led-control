@@ -79,8 +79,9 @@
             ```
             Paneel **0** is de voedingsingang. De getallen zijn protocol-ID's.
             {% else %}
-            Druk eenmaal op **Paneelindeling uitlezen**. Dit is alleen-lezen en
-            verandert geen lichtkleur of opgeslagen vorm.
+            Importeer eerst een vastgelegde Shape Recognition-waarde via
+            **Integratie configureren**. De LAN-uitleesknop is alleen-lezen,
+            maar de geteste firmware geeft daar normaal geen volledige kaart terug.
             {% endif %}
     - type: grid
       cards:

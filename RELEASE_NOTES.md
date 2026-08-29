@@ -1,7 +1,23 @@
+# 0.3.1 — veilige topology-import en correcte multicastdiagnose
+
+- H6069 `status`-ontvangst meldt zich nu aan bij multicastgroep
+  `239.255.255.250` op UDP 4002; alleen binden aan de poort bleek onvoldoende.
+- Fysieke hertest vastgelegd: de actuele firmware retourneert normaal 6 bytes
+  runtime-`pt`, ook wanneer Shape Recognition in de Govee-app zichtbaar is, en
+  niet automatisch de eerder vastgelegde 129-byte paneelkaart.
+- Optionele Shape Recognition-Base64-import toegevoegd aan **Configureren**;
+  header, lengte, checksum, boomstructuur, coördinaten en paneelaantal worden
+  gevalideerd voordat Home Assistant de kaart gebruikt.
+- Een mislukte LAN-proef overschrijft nooit een geldige geïmporteerde of
+  herstelde kaart en geeft voortaan een specifieke protocolfout in plaats van
+  alleen `timed out`.
+- Twee socketregressietests toegevoegd; totaal nu 27.
+
 # 0.3.0 — H6069-vormherkenning in Home Assistant
 
-- Alleen-lezen H6069 `status.pt`-decoder toegevoegd en fysiek geverifieerd op de
-  actuele 40-paneelinstallatie.
+- H6069 `status.pt`-decoder toegevoegd en geverifieerd op een vastgelegde
+  40-paneelkaart. De latere 0.3.1-hertest corrigeert de aanname dat iedere lege
+  LAN-statusvraag deze lange kaart opnieuw retourneert.
 - Expliciete knop **Paneelindeling uitlezen**; setup, reload en restore blijven
   netwerk- en lichtdata-vrij.
 - Nieuwe sensor **Paneelindeling** met nummerrooster, genormaliseerde x/y-posities,

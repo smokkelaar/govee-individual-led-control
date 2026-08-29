@@ -14,7 +14,12 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 
 from .h6069_protocol import RGB, build_ptreal_datagram
-from .h6069_topology import H6069Topology, query_topology
+from .h6069_topology import (
+    H6069Topology,
+    H6069TopologyError,
+    decode_topology_pt,
+    query_topology,
+)
 from .visualization import h6069_level_frame
 
 _LOGGER = logging.getLogger(__name__)
@@ -79,6 +84,7 @@ class H6069PanelController:
         panel_count: int,
         name: str,
         debounce_ms: int,
+        topology_pt: str = "",
     ) -> None:
         self.hass = hass
         self.host = host
@@ -100,6 +106,15 @@ class H6069PanelController:
         self.topology_last_updated: str | None = None
         self.topology_error: str | None = None
         self.topology_queries = 0
+        if topology_pt:
+            try:
+                self.topology = decode_topology_pt(
+                    topology_pt,
+                    source="validated manual Shape Recognition import",
+                )
+            except H6069TopologyError as err:
+                self.topology_error = f"saved topology import is invalid: {err}"
+                _LOGGER.warning("Ignoring invalid saved H6069 topology: %s", err)
 
     def add_listener(self, listener: Callable[[], None]) -> Callable[[], None]:
         """Register an entity-state listener."""

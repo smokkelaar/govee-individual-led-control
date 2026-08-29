@@ -22,8 +22,8 @@ Matter is geen elementtransport in deze integratie. De native H70B3-LAN-proeven 
 
 ### Vormherkenning uitlezen
 
-Een read-only LAN-request met commando `status` retourneert `data.pt`. Voor de
-geteste installatie decodeert dit Base64-veld naar 129 bytes:
+Een eerder vastgelegde Shape Recognition-`pt` van de geteste installatie
+decodeert naar 129 bytes:
 
 - header `BB 00 7C B2 00`, gevolgd door paneelaantal 40;
 - twee verdere headerbytes;
@@ -38,11 +38,19 @@ coördinaten zonder overlap en exact dezelfde vorm als Shape Recognition in de
 Govee-app. De decoder weigert onbekende headers, verkeerde lengte, ongeldige
 zijden, een fout aantal boomverbindingen, coördinaatoverlap en checksumfouten.
 
-Home Assistant leest dit uitsluitend na een expliciete druk op
-**Paneelindeling uitlezen**. Setup, reload en restore voeren geen statusquery uit.
-Een tweede Govee LAN-integratie die UDP-poort 4002 op dezelfde HA-host deelt kan
-het antwoord onderscheppen; de topologiesensor meldt dan een fout en de bestaande
-paneelbediening blijft onaangetast.
+Een lege read-only LAN-`status`vraag is opnieuw fysiek getest. H6069 antwoordt
+via multicast `239.255.255.250:4002`, waardoor een luistersocket zowel poort 4002
+moet delen als de multicastgroep moet joinen. De actuele firmware retourneert
+daarbij normaal een `pt` van slechts 6 bytes met runtime-status; ook met het
+Shape Recognition-scherm in de Govee-app open kwam de 129-byte kaart niet terug.
+De app gebruikt dus een elders opgeslagen kopie en een lege statusvraag is geen
+betrouwbare kaartbron.
+
+Home Assistant kan daarom een eerder vastgelegde Base64-kaart via de gewone
+optiesdialoog importeren. Header, lengte, checksum, boom, coördinaten en
+paneelaantal worden vóór opslag gecontroleerd. **Paneelindeling via LAN proberen** blijft
+een expliciete experimentele alleen-lezen proef voor firmware die de lange vorm
+wel retourneert. Setup, reload en restore doen geen netwerkquery of lichtschrijfopdracht.
 
 Fysieke referentievector: 39 panelen blauw en protocolpaneel 5 rood. Dit veranderde exact één paneel binnen ongeveer 300 ms. De vijf Base64-frames staan als vaste regressietest in `tests/test_h6069_protocol.py`.
 

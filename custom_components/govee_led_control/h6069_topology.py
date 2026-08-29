@@ -1,9 +1,10 @@
-"""Read and decode the physical H6069 panel topology over local LAN.
+"""Validate H6069 Shape Recognition data and probe read-only LAN status.
 
-The ``status`` request is read-only.  Its ``pt`` field contains the shape that
-Govee Home learned during Shape Recognition.  The format below was established
-against a real 40-panel H6069 installation and is deliberately validated
-strictly so an unknown firmware layout is never presented as a correct map.
+The long topology format was established against a real 40-panel installation.
+The tested firmware's normal ``status.pt`` reply is only short runtime state,
+so a live query is explicitly best-effort and a captured long value can be
+imported. Both routes use the same strict decoder so unknown firmware data is
+never presented as a correct map.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from typing import Any
 
 STATUS_LISTEN_PORT = 4002
 DEVICE_PORT = 4003
+MULTICAST_GROUP = "239.255.255.250"
 
 _STATUS_HEADER_PREFIX = bytes((0xBB, 0x00, 0x7C, 0xB2, 0x00))
 _RECORD_PREFIX = 0x20
@@ -55,6 +57,7 @@ class H6069Topology:
     width: int
     height: int
     fingerprint: str
+    source: str = "read-only local LAN status.pt"
 
     @property
     def panel_count(self) -> int:
@@ -99,7 +102,7 @@ class H6069Topology:
     def state_attributes(self) -> dict[str, Any]:
         """Return JSON-safe data suitable for a Home Assistant sensor."""
         return {
-            "source": "read-only local LAN status.pt",
+            "source": self.source,
             "protocol_indexing": "zero-based",
             "root_panel": 0,
             "power_input_side": self.placements[0].input_side,
@@ -305,13 +308,22 @@ def decode_topology_blob(blob: bytes) -> H6069Topology:
     )
 
 
-def decode_topology_pt(encoded: str) -> H6069Topology:
+def decode_topology_pt(
+    encoded: str, *, source: str = "read-only local LAN status.pt"
+) -> H6069Topology:
     """Decode the Base64 ``pt`` value from a Govee status response."""
     try:
         blob = base64.b64decode(encoded, validate=True)
     except (ValueError, TypeError) as err:
         raise H6069TopologyError("status.pt is not valid Base64") from err
-    return decode_topology_blob(blob)
+    topology = decode_topology_blob(blob)
+    return H6069Topology(
+        placements=topology.placements,
+        width=topology.width,
+        height=topology.height,
+        fingerprint=topology.fingerprint,
+        source=source,
+    )
 
 
 def parse_status_datagram(datagram: bytes | str) -> H6069Topology:
@@ -334,6 +346,8 @@ def parse_status_datagram(datagram: bytes | str) -> H6069Topology:
 def query_topology(host: str, timeout: float = 5.0) -> H6069Topology:
     """Request and receive one topology without changing visible light state."""
     deadline = time.monotonic() + timeout
+    memberships: list[bytes] = []
+    last_topology_error: H6069TopologyError | None = None
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp_socket:
             udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -344,6 +358,37 @@ def query_topology(host: str, timeout: float = 5.0) -> H6069Topology:
                 except OSError:
                     pass
             udp_socket.bind(("0.0.0.0", STATUS_LISTEN_PORT))
+
+            # H6069 sends ``status`` replies to the Govee multicast group on
+            # port 4002. Binding the port alone is not sufficient on Linux:
+            # the kernel drops multicast traffic until the socket joins the
+            # group. Join both the route-selected interface and the default
+            # interface so this also works on multi-homed Home Assistant hosts.
+            route_interface = "0.0.0.0"
+            try:
+                with socket.socket(
+                    socket.AF_INET, socket.SOCK_DGRAM
+                ) as route_socket:
+                    route_socket.connect((host, DEVICE_PORT))
+                    route_interface = str(route_socket.getsockname()[0])
+            except OSError:
+                pass
+            for interface in (route_interface, "0.0.0.0"):
+                membership = socket.inet_aton(MULTICAST_GROUP) + socket.inet_aton(
+                    interface
+                )
+                if membership in memberships:
+                    continue
+                try:
+                    udp_socket.setsockopt(
+                        socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, membership
+                    )
+                except OSError:
+                    continue
+                memberships.append(membership)
+            if not memberships:
+                raise OSError("could not join the Govee multicast group")
+
             udp_socket.sendto(build_status_datagram(), (host, DEVICE_PORT))
 
             while True:
@@ -356,12 +401,18 @@ def query_topology(host: str, timeout: float = 5.0) -> H6069Topology:
                     continue
                 try:
                     return parse_status_datagram(datagram)
-                except H6069TopologyError:
+                except H6069TopologyError as err:
                     # A concurrent devStatus query can answer from the same IP.
                     # Keep waiting only until this request's fixed deadline.
+                    last_topology_error = err
                     continue
     except (OSError, TimeoutError) as err:
         detail = str(err).strip() or "timeout"
+        if last_topology_error is not None:
+            detail = (
+                "device answered, but status.pt did not contain a panel topology: "
+                f"{last_topology_error}"
+            )
         raise H6069TopologyQueryError(
             f"no valid H6069 topology response from {host}: {detail}"
         ) from err

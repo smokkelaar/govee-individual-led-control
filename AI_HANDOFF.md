@@ -2,7 +2,7 @@
 
 ## Doel en status
 
-Dit is de beoogde algemene Govee-bibliotheek voor Home Assistant. Versie 0.2.0 combineert twee afzonderlijk bewezen adapters zonder de oude installaties te wijzigen:
+Dit is de beoogde algemene Govee-bibliotheek voor Home Assistant. Versie 0.3.1 combineert twee afzonderlijk bewezen adapters zonder de oude installaties te wijzigen:
 
 - H6069 Mini Panel Lights: volledige individuele paneelcontrole via LAN.
 - H70B3 Curtain Lights 2: volledige 520-ledcontrole via Bluetooth; bedoeld voor directe Bluetooth of een actieve ESPHome Bluetooth-proxy.
@@ -21,12 +21,17 @@ bedienbaar.
 - referentietest: ID 5 rood en alle andere blauw veranderde exact één paneel;
 - zichtbare reactie ongeveer 300 ms;
 - UDP heeft geen ack of kleur-readback; toestand is optimistisch.
-- `status` retourneert een checksum-beschermde `pt`-topologie; de decoder levert
-  exact de 40-paneelvorm en nummering uit de Shape Recognition-screenshot.
-- knop **Paneelindeling uitlezen** verandert geen lichtdata; sensor
-  **Paneelindeling** bevat rooster, coördinaten, verbindingen en fingerprint.
-- de sensor herstelt zijn laatste geslaagde rooster na HA-herstart; een nieuwe
-  query blijft expliciet en is alleen nodig na vormwijziging of live controle.
+- de decoder levert uit de vastgelegde, checksum-beschermde 129-byte `pt` exact
+  de 40-paneelvorm en nummering uit de Shape Recognition-screenshot;
+- een lege LAN-`status`vraag antwoordt via multicast op 4002, maar de actuele
+  firmware gaf in drie herhaalde proeven slechts 6 bytes runtime-`pt`, ook met
+  het Shape Recognition-scherm open. Claim dus niet dat de kaart live uit een
+  lege statusvraag komt;
+- **Configureren** accepteert een optionele Shape Recognition-Base64-import en
+  valideert die volledig. De sensor bevat rooster, coördinaten, verbindingen en
+  fingerprint en blijft na HA-herstart of mislukte LAN-proef beschikbaar;
+- knop **Paneelindeling via LAN proberen** verandert geen lichtdata maar is experimenteel
+  voor firmware die mogelijk wel een lange `pt` retourneert.
 - statische A3-frames bewijzen alleen één RGB-waarde per paneel. Een zichtbare
   blauw/groene foutwaas suggereert interne emittercontrole, maar is geen bewijs
   voor een extern subpaneelprotocol; zie `H6069_INNER_LED_RESEARCH.md`.
@@ -102,7 +107,7 @@ python -m compileall -q custom_components\govee_led_control
 python -m unittest discover -s tests -v
 ```
 
-Er horen 25 protocol-, topologie-, crypto- en visualisatietests te slagen.
+Er horen 27 protocol-, topologie-, crypto- en visualisatietests te slagen.
 Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
 komt.
 

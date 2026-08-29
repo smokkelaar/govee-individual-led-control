@@ -147,7 +147,9 @@ class H6069TopologySensor(RestoreEntity, SensorEntity):
             return attributes
         attributes: dict[str, Any] = {
             "status": (
-                "fout"
+                "beschikbaar; laatste LAN-uitlezing mislukt"
+                if self._controller.topology_error and topology is not None
+                else "fout"
                 if self._controller.topology_error
                 else "uitgelezen" if topology is not None else "nog niet uitgelezen"
             ),

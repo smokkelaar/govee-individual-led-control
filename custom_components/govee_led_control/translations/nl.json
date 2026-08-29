@@ -34,19 +34,26 @@
     },
     "error": {
       "invalid_ip": "Vul een geldig IP-adres in.",
-      "invalid_address": "Vul een geldig Bluetooth MAC-adres in."
+      "invalid_address": "Vul een geldig Bluetooth MAC-adres in.",
+      "invalid_topology": "Dit is geen geldige H6069 Shape Recognition-paneelindeling.",
+      "topology_count_mismatch": "De geïmporteerde indeling bevat een ander aantal panelen."
     },
     "abort": {
       "already_configured": "Dit Govee-apparaat is al geconfigureerd."
     }
   },
   "options": {
+    "error": {
+      "invalid_topology": "Dit is geen geldige H6069 Shape Recognition-paneelindeling.",
+      "topology_count_mismatch": "De geïmporteerde indeling bevat een ander aantal panelen."
+    },
     "step": {
       "init": {
         "title": "Modelopties",
-        "description": "Wijzigingen herladen alleen dit apparaat. Herladen verzendt nooit automatisch een fysiek frame.",
+        "description": "Wijzigingen herladen alleen dit apparaat. Herladen verzendt nooit automatisch een fysiek frame. Voor H6069 wordt een optionele vastgelegde Shape Recognition-Base64-waarde strikt gecontroleerd.",
         "data": {
           "panel_count": "Aantal H6069-panelen",
+          "topology_pt": "Shape Recognition-paneelindeling (Base64, optioneel)",
           "create_pixel_entities": "Maak 520 afzonderlijke H70B3-ledentiteiten",
           "debounce_ms": "Voeg losse wijzigingen samen gedurende (ms)",
           "idle_disconnect_seconds": "Verbreek Bluetooth na inactiviteit (s)"
