@@ -18,15 +18,16 @@ custom_components/govee_led_control/
   model_registry.py        capabilitycontract
   runtime.py               één geconfigureerd apparaat
   h6069_protocol.py        pure LAN-encoding
+  h6069_topology.py        pure status.pt-vormdecoder + read-only query
   h6069_controller.py      paneelshadow + UDP
   crypto.py                pure H70B3-bescherming
   h70b3_protocol.py        pure PNG/pakketencoding
   h70b3_ble.py             connectable Bluetoothtransport
   h70b3_controller.py      20x26-shadow + debounce
   light.py                 matrix, panelen en pixels
-  button.py                expliciete test/clearknoppen
+  button.py                expliciete test/clear/uitleesknoppen
   number.py/select.py      sensorvisualisatie-preview
-  sensor.py                transport en diagnostiek
+  sensor.py                transport, topologie en diagnostiek
   switch.py                montage/spiegeling
 ```
 

@@ -1,3 +1,20 @@
+# 0.3.0 — H6069-vormherkenning in Home Assistant
+
+- Alleen-lezen H6069 `status.pt`-decoder toegevoegd en fysiek geverifieerd op de
+  actuele 40-paneelinstallatie.
+- Expliciete knop **Paneelindeling uitlezen**; setup, reload en restore blijven
+  netwerk- en lichtdata-vrij.
+- Nieuwe sensor **Paneelindeling** met nummerrooster, genormaliseerde x/y-posities,
+  boomverbindingen, oriëntaties, fingerprint en configuratiecontrole.
+- Laatste geslaagde nummering wordt na een Home Assistant-herstart hersteld;
+  opnieuw uitlezen is alleen nodig na een fysieke vormwijziging of controle.
+- Standaard Markdown-dashboardkaart toegevoegd; geen extra frontendkaart nodig.
+- Strikte afwijzing van onbekende headers, verkeerde lengte, checksumfouten,
+  ongeldige boomstructuren en coördinaatoverlap.
+- Onderzoeksspoor voor mogelijke afzonderlijke leds binnen één H6069-paneel
+  gedocumenteerd zonder onbewezen ondersteuning te claimen.
+- Vier topologieregressietests toegevoegd; totaal nu 25.
+
 # 0.2.0 — eerste algemene Govee-suite
 
 - H6069 LAN-paneeladapter en H70B3 Bluetooth-pixeladapter samengebracht onder domein `govee_led_control`.

@@ -37,11 +37,12 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         },
         smart_functions={
             "music_sync": "Officieel beschikbaar; protocol nog niet geïmplementeerd",
-            "shape_recognition": "Officieel via Govee-app/MCU; niet uitleesbaar in HA",
+            "shape_recognition": "Fysieke indeling via alleen-lezen LAN-status uitleesbaar",
+            "inner_panel_leds": "Hardware-indicatie gezien; externe adressering nog niet bewezen",
             "sensor_level_demo": "Beschikbaar via een Home Assistant-sensor",
             "motion_sensor": "Geen ingebouwde bewegingssensor aangetoond",
         },
-        evidence="LAN ptReal/A3 op echte 40-paneelinstallatie bevestigd",
+        evidence="LAN ptReal/A3 en status.pt-topologie op echte 40-paneelinstallatie bevestigd",
     ),
     MODEL_H70B3: ModelSpec(
         key=MODEL_H70B3,

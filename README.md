@@ -20,6 +20,8 @@ The integration never silently substitutes Matter or cloud control for individua
 ## Highlights
 
 - one RGB light entity per H6069 panel;
+- read-only retrieval of the learned H6069 Shape Recognition topology, exposed
+  as a numbered grid and structured panel coordinates;
 - one H70B3 matrix light and, optionally, 520 individual RGB light entities;
 - complete-frame updates with debouncing to combine rapid changes;
 - persistent horizontal and vertical curtain mirroring;
@@ -30,6 +32,15 @@ The integration never silently substitutes Matter or cloud control for individua
 - no physical output during setup, reload or state restoration.
 
 The state is optimistic. H6069 UDP has no acknowledgement or visual-state readback. H70B3 acknowledges the Bluetooth upload and activation, but the visible pixel colors are not read back.
+
+H6069 setup and reload do not query the device. Press **Paneelindeling
+uitlezen** when you explicitly want to read the current shape. This read-only
+request changes no color, brightness or saved Govee configuration. The related
+sensor exposes the zero-based number grid, panel coordinates, connections and a
+fingerprint, so the dashboard follows a newly recognized shape without manual
+renumbering. Home Assistant restores the last successful map after a restart;
+press the button again only after changing Shape Recognition or when you want to
+verify the live device.
 
 ## HACS installation
 
@@ -85,12 +96,14 @@ Verify the actual Home Assistant entity IDs before adding the views; an existing
 
 - [MODEL_SUPPORT.md](MODEL_SUPPORT.md) — capability and transport contract.
 - [PROTOCOL.md](PROTOCOL.md) — physically verified protocol boundaries.
+- [H6069_INNER_LED_RESEARCH.md](H6069_INNER_LED_RESEARCH.md) — current evidence
+  and a safe test plan for possible LEDs inside each panel.
 - [PROXY_SETUP.md](PROXY_SETUP.md) — active ESPHome Bluetooth proxy setup.
 - [DEVELOPMENT.md](DEVELOPMENT.md) — extension architecture and tests.
 - [AI_HANDOFF.md](AI_HANDOFF.md) — evidence and continuation notes for another AI or developer.
 - [RELEASE_NOTES.md](RELEASE_NOTES.md) — current release notes.
 
-The protocol, crypto and visualization suite currently contains 21 dependency-free regression tests:
+The protocol, topology, crypto and visualization suite currently contains 25 regression tests:
 
 ```bash
 python -m unittest discover -s tests -v

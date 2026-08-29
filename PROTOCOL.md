@@ -20,9 +20,37 @@ Matter is geen elementtransport in deze integratie. De native H70B3-LAN-proeven 
 - Daarna volgt het statische activatieframe met prefix `33 05 0A 20 03`.
 - De frames worden Base64 opgenomen in een compacte Govee `ptReal` JSON-datagram.
 
+### Vormherkenning uitlezen
+
+Een read-only LAN-request met commando `status` retourneert `data.pt`. Voor de
+geteste installatie decodeert dit Base64-veld naar 129 bytes:
+
+- header `BB 00 7C B2 00`, gevolgd door paneelaantal 40;
+- twee verdere headerbytes;
+- exact 40 records van drie bytes: `20`, lokale ingangszijde en bitmasker van
+  aangesloten kindzijden;
+- één XOR-checksumbyte; XOR over de complete blob is nul.
+
+De records vormen een depth-first preorder-boom. Lokale zijden lopen met de klok
+mee als `01, 02, 04, 08`; de ingangszijde bepaalt de rotatie van ieder volgend
+paneel. Met de voedingsingang van paneel 0 naar beneden levert dit 40 unieke
+coördinaten zonder overlap en exact dezelfde vorm als Shape Recognition in de
+Govee-app. De decoder weigert onbekende headers, verkeerde lengte, ongeldige
+zijden, een fout aantal boomverbindingen, coördinaatoverlap en checksumfouten.
+
+Home Assistant leest dit uitsluitend na een expliciete druk op
+**Paneelindeling uitlezen**. Setup, reload en restore voeren geen statusquery uit.
+Een tweede Govee LAN-integratie die UDP-poort 4002 op dezelfde HA-host deelt kan
+het antwoord onderscheppen; de topologiesensor meldt dan een fout en de bestaande
+paneelbediening blijft onaangetast.
+
 Fysieke referentievector: 39 panelen blauw en protocolpaneel 5 rood. Dit veranderde exact één paneel binnen ongeveer 300 ms. De vijf Base64-frames staan als vaste regressietest in `tests/test_h6069_protocol.py`.
 
 Omdat UDP `sendto` geen apparaatbevestiging geeft, betekent `successful_uploads` uitsluitend dat het besturingssysteem de datagram zonder socketfout heeft verzonden. De UI blijft `assumed_state`.
+
+De bewezen A3-static-payload adresseert één RGB-kleur per fysiek paneel. Mogelijke
+afzonderlijke leds binnen een paneel vallen nog buiten de bewezen protocolgrens;
+zie `H6069_INNER_LED_RESEARCH.md`.
 
 ## H70B3 Curtain Lights 2
 

@@ -53,6 +53,10 @@
         - type: tile
           entity: sensor.h6069_transport
         - type: tile
+          entity: sensor.h6069_paneelindeling
+        - type: tile
+          entity: button.h6069_paneelindeling_uitlezen
+        - type: tile
           entity: select.h6069_visual_style
         - type: tile
           entity: number.h6069_visual_level
@@ -63,6 +67,21 @@
           entity: button.h6069_demo
         - type: tile
           entity: button.h6069_clear
+        - type: markdown
+          title: Uitgelezen fysieke nummering
+          entity_id: sensor.h6069_paneelindeling
+          card_size: 5
+          content: |-
+            {% set grid = state_attr('sensor.h6069_paneelindeling', 'grid_text') %}
+            {% if grid %}
+            ```text
+            {{ grid }}
+            ```
+            Paneel **0** is de voedingsingang. De getallen zijn protocol-ID's.
+            {% else %}
+            Druk eenmaal op **Paneelindeling uitlezen**. Dit is alleen-lezen en
+            verandert geen lichtkleur of opgeslagen vorm.
+            {% endif %}
     - type: grid
       cards:
         - type: heading

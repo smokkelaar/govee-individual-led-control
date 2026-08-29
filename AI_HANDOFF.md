@@ -7,7 +7,9 @@ Dit is de beoogde algemene Govee-bibliotheek voor Home Assistant. Versie 0.2.0 c
 - H6069 Mini Panel Lights: volledige individuele paneelcontrole via LAN.
 - H70B3 Curtain Lights 2: volledige 520-ledcontrole via Bluetooth; bedoeld voor directe Bluetooth of een actieve ESPHome Bluetooth-proxy.
 
-De integratie maakt bij setup geen fysiek commando. Demo's en sensorreacties zijn alleen expliciet bedienbaar.
+De integratie maakt bij setup geen fysiek commando of statusquery. Demo's,
+sensorreacties en de read-only H6069-topologiequery zijn alleen expliciet
+bedienbaar.
 
 ## Fysiek bewezen feiten — niet opnieuw gokken
 
@@ -19,6 +21,15 @@ De integratie maakt bij setup geen fysiek commando. Demo's en sensorreacties zij
 - referentietest: ID 5 rood en alle andere blauw veranderde exact één paneel;
 - zichtbare reactie ongeveer 300 ms;
 - UDP heeft geen ack of kleur-readback; toestand is optimistisch.
+- `status` retourneert een checksum-beschermde `pt`-topologie; de decoder levert
+  exact de 40-paneelvorm en nummering uit de Shape Recognition-screenshot.
+- knop **Paneelindeling uitlezen** verandert geen lichtdata; sensor
+  **Paneelindeling** bevat rooster, coördinaten, verbindingen en fingerprint.
+- de sensor herstelt zijn laatste geslaagde rooster na HA-herstart; een nieuwe
+  query blijft expliciet en is alleen nodig na vormwijziging of live controle.
+- statische A3-frames bewijzen alleen één RGB-waarde per paneel. Een zichtbare
+  blauw/groene foutwaas suggereert interne emittercontrole, maar is geen bewijs
+  voor een extern subpaneelprotocol; zie `H6069_INNER_LED_RESEARCH.md`.
 
 De oude terugvalintegratie staat in `outputs/govee_h6069_panels` en de oude installatiezip blijft behouden.
 
@@ -40,6 +51,7 @@ De oude terugvalintegratie staat in `outputs/govee_h70b3_curtain`.
 
 - Domein: `govee_led_control`.
 - `model_registry.py`: gebruikerszichtbare capability- en transportclaims.
+- `h6069_topology.py`: strikte pure decoder en expliciete read-only LAN-query.
 - `h6069_protocol.py` + `h6069_controller.py`: zelfstandige LAN-adapter.
 - `crypto.py`, `h70b3_protocol.py`, `h70b3_ble.py`, `h70b3_controller.py`: zelfstandige Bluetoothadapter.
 - `runtime.py`: dunne adapterhouder plus herstelde demosettings.
@@ -75,7 +87,11 @@ Als een Home Assistant-knop, raw editor of herstart nodig is, stop direct en vra
 
 De gebruiker wil onder **Lichtbediening** tabs voor overzicht, H6069 en H70B3. De templates zijn voorbereid maar niet live ingevoegd. Na installatie eerst de werkelijke entity-id's uitlezen; Home Assistant kan een suffix toevoegen wanneer oude entity-id's nog bestaan. Pas daarna de placeholders in `DASHBOARD_TABS.yaml` aan en laat de gebruiker de raw dashboardconfiguratie opslaan.
 
-De optionele 520-ledkaart in `DASHBOARD_H70B3_FULL_GRID.yaml` gebruikt Auto Entities. Controleer eerst of die HACS-frontendkaart al is geïnstalleerd; maak de hoofdtab niet afhankelijk van die kaart.
+De H6069-tab bevat een standaard Markdown-kaart die `grid_text` uit de
+topologiesensor toont; daarvoor is geen custom frontendkaart nodig. De optionele
+520-ledkaart in `DASHBOARD_H70B3_FULL_GRID.yaml` gebruikt Auto Entities.
+Controleer eerst of die HACS-frontendkaart al is geïnstalleerd; maak de hoofdtab
+niet afhankelijk van die kaart.
 
 ## Verificatie
 
@@ -86,6 +102,8 @@ python -m compileall -q custom_components\govee_led_control
 python -m unittest discover -s tests -v
 ```
 
-Er horen 21 protocol-, crypto- en visualisatietests te slagen. Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip komt.
+Er horen 25 protocol-, topologie-, crypto- en visualisatietests te slagen.
+Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
+komt.
 
 De installatiezip moet bovenaan exact `custom_components/govee_led_control/` bevatten. De ontwikkelaarszip mag documentatie en tests bevatten.

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime, timezone
 import logging
 import socket
 import time
@@ -13,6 +14,7 @@ from typing import Any
 from homeassistant.core import HomeAssistant
 
 from .h6069_protocol import RGB, build_ptreal_datagram
+from .h6069_topology import H6069Topology, query_topology
 from .visualization import h6069_level_frame
 
 _LOGGER = logging.getLogger(__name__)
@@ -88,11 +90,16 @@ class H6069PanelController:
         self._listeners: set[Callable[[], None]] = set()
         self._send_timer: asyncio.TimerHandle | None = None
         self._send_lock = asyncio.Lock()
+        self._topology_lock = asyncio.Lock()
         self._dirty = False
         self._closed = False
         self.last_error: str | None = None
         self.last_send_duration: float | None = None
         self.successful_uploads = 0
+        self.topology: H6069Topology | None = None
+        self.topology_last_updated: str | None = None
+        self.topology_error: str | None = None
+        self.topology_queries = 0
 
     def add_listener(self, listener: Callable[[], None]) -> Callable[[], None]:
         """Register an entity-state listener."""
@@ -234,6 +241,26 @@ class H6069PanelController:
             self._send_timer = None
         await self._async_send_pending()
 
+    async def async_refresh_topology(self) -> None:
+        """Read the learned panel shape without changing any visible output."""
+        async with self._topology_lock:
+            try:
+                topology = await self.hass.async_add_executor_job(
+                    query_topology, self.host
+                )
+            except Exception as err:
+                self.topology_error = str(err)
+                _LOGGER.warning(
+                    "Could not read H6069 topology from %s: %s", self.host, err
+                )
+                self._notify_listeners()
+                raise
+            self.topology = topology
+            self.topology_last_updated = datetime.now(timezone.utc).isoformat()
+            self.topology_error = None
+            self.topology_queries += 1
+            self._notify_listeners()
+
     def _send_udp(self, datagram: bytes) -> None:
         """Send one complete ptReal datagram from an executor thread."""
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as udp_socket:
@@ -262,4 +289,13 @@ class H6069PanelController:
             "last_send_duration_seconds": self.last_send_duration,
             "successful_uploads": self.successful_uploads,
             "acknowledgement": "UDP send only; physical state is optimistic",
+            "topology": {
+                "available": self.topology is not None,
+                "last_updated": self.topology_last_updated,
+                "last_error": self.topology_error,
+                "successful_queries": self.topology_queries,
+                "fingerprint": (
+                    self.topology.fingerprint if self.topology is not None else None
+                ),
+            },
         }

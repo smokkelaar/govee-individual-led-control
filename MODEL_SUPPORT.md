@@ -15,7 +15,11 @@ Iedere adapter registreert een `ModelSpec` in `model_registry.py`. Daarmee ziet 
 - Element: paneel-ID, 0..39 in de huidige installatie; encoder ondersteunt 1..70.
 - Bluetooth: niet geïmplementeerd voor individuele panelen.
 - Matter: alleen basisbediening buiten deze elementadapter.
-- Slim: officiële muzieksynchronisatie en vormherkenning bekend; geen stabiel HA-protocol of bewezen ingebouwde bewegingssensor.
+- Slim: vormherkenning is via een expliciete alleen-lezen LAN-query beschikbaar
+  als nummerrooster en coördinaten. Muzieksynchronisatie heeft nog geen stabiel
+  HA-protocol en er is geen bewezen ingebouwde bewegingssensor.
+- LEDs binnen één paneel: lokale hardware/firmware-indicatie gezien, maar nog
+  geen bewezen extern adres of commando; daarom niet als element aangeboden.
 
 ## H70B3
 
