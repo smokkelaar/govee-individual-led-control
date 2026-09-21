@@ -1,3 +1,10 @@
+# 0.4.0 — Govee LED Studio
+
+- Gebundelde **Govee LED Studio**-dashboardkaart toegevoegd.
+- Visueel tekenen en patronen voor H6069-panelen en de H70B3 20×26-matrix.
+- Lokale GIF-decodering in de browser en geanimeerde H70B3-frameweergave;
+  GIF-bestanden worden niet naar Home Assistant geüpload of opgeslagen.
+
 # 0.3.1 — veilige topology-import en correcte multicastdiagnose
 
 - H6069 `status`-ontvangst meldt zich nu aan bij multicastgroep

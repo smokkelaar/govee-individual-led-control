@@ -29,6 +29,8 @@ The integration never silently substitutes Matter or cloud control for individua
 - a transport/capability sensor with connection source and diagnostics;
 - generic `0..100` visualizations: `bar`, `position` and `pulse`;
 - service actions for indexed elements, H70B3 x/y pixels and complete frames;
+- an included **Govee LED Studio** dashboard card with a visual editor, presets
+  and local GIF-to-H70B3 animation playback;
 - no physical output during setup, reload or state restoration.
 
 The state is optimistic. H6069 UDP has no acknowledgement or visual-state readback. H70B3 acknowledges the Bluetooth upload and activation, but the visible pixel colors are not read back.
@@ -56,6 +58,23 @@ This repository is ready to use as a HACS custom repository:
 4. Select category **Integration**.
 5. Install **Govee Individual LED Control** and restart Home Assistant.
 6. Add the integration from **Settings → Devices & services**.
+
+The integration also serves and loads its bundled dashboard card automatically.
+After restarting Home Assistant, add **Govee LED Studio** from the dashboard card
+picker or use the YAML below. GIF files stay in the browser: frames are decoded
+locally and sent directly to the configured H70B3 through the integration.
+
+```yaml
+type: custom:govee-led-studio
+h6069_transport_entity: sensor.h6069_transport
+h6069_topology_entity: sensor.h6069_paneelindeling
+h70b3_transport_entity: sensor.h70b3_transport
+h6069_panel_count: 40
+```
+
+Existing entity registries can append a suffix to these entity IDs. Check the
+transport and topology sensors in Home Assistant and adjust the card YAML when
+needed.
 
 The repository is prepared for later submission to the default HACS store, but is not presented as a default-store integration until the Home Assistant Brands and `hacs/default` reviews have been accepted. See [HACS_STATUS.md](HACS_STATUS.md).
 
@@ -91,6 +110,9 @@ Instead, any real Home Assistant sensor can drive a normalized static visualizat
 
 ## Dashboard examples
 
+- **Govee LED Studio** is bundled with the integration and provides the easiest
+  visual control for both supported models, including browser-local GIF playback
+  for the 20×26 H70B3 matrix.
 - [DASHBOARD_TABS.yaml](DASHBOARD_TABS.yaml): overview, H6069 and H70B3 views using standard cards.
 - [DASHBOARD_H70B3_FULL_GRID.yaml](DASHBOARD_H70B3_FULL_GRID.yaml): optional 20×26 direct LED grid using the Auto Entities HACS frontend card.
 

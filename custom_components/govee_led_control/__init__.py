@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 import voluptuous as vol
+from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ADDRESS, CONF_HOST, CONF_NAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -61,6 +64,9 @@ from .model_registry import get_model_spec
 from .runtime import GoveeRuntime
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+_FRONTEND_FILE = Path(__file__).parent / "frontend" / "govee-led-studio.js"
+_FRONTEND_URL = "/govee_led_control/govee-led-studio.js"
 
 _TARGET_FIELD = {vol.Optional(ATTR_CONFIG_ENTRY_ID): str}
 _COMMIT_FIELD = {vol.Optional(ATTR_COMMIT, default=True): cv.boolean}
@@ -295,6 +301,10 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         DOMAIN, {DATA_RUNTIMES: {}, DATA_SERVICES_REGISTERED: False}
     )
     _register_services(hass)
+    await hass.http.async_register_static_paths(
+        [StaticPathConfig(_FRONTEND_URL, str(_FRONTEND_FILE), False)]
+    )
+    add_extra_js_url(hass, _FRONTEND_URL)
     return True
 
 
