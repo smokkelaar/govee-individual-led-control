@@ -1,3 +1,14 @@
+# 0.4.1 — responsieve LED Studio
+
+- De kaart gebruikt nu zijn eigen beschikbare breedte in plaats van alleen de
+  volledige browserbreedte om naar een compacte indeling over te schakelen.
+- Bedieningspanelen, patroonknoppen en GIF-instellingen worden op smalle
+  dashboardsecties niet meer afgekapt.
+- In een sectieweergave gebruikt LED Studio standaard de volledige beschikbare
+  sectiebreedte.
+- Dubbele kaartvermeldingen worden voorkomen wanneer dezelfde module via meer
+  dan één Home Assistant-resourcepad is geladen.
+
 # 0.4.0 — Govee LED Studio
 
 - Gebundelde **Govee LED Studio**-dashboardkaart toegevoegd.

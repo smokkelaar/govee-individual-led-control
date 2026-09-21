@@ -64,6 +64,10 @@ After restarting Home Assistant, add **Govee LED Studio** from the dashboard car
 picker or use the YAML below. GIF files stay in the browser: frames are decoded
 locally and sent directly to the configured H70B3 through the integration.
 
+The card uses the full width of a dashboard section and is container-responsive:
+in a narrow section its controls stack vertically, while a wider section shows
+the LED canvas and controls side by side without clipping.
+
 ```yaml
 type: custom:govee-led-studio
 h6069_transport_entity: sensor.h6069_transport
