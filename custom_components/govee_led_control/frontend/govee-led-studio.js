@@ -1,4 +1,4 @@
-const CARD_VERSION = "0.4.1";
+const CARD_VERSION = "0.5.0";
 const H70_WIDTH = 20;
 const H70_HEIGHT = 26;
 const H70_PIXELS = H70_WIDTH * H70_HEIGHT;
@@ -32,6 +32,12 @@ function rgbToHex(r, g, b) {
   return `#${[r, g, b].map((value) => value.toString(16).padStart(2, "0")).join("")}`;
 }
 
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;",
+  })[character]);
+}
+
 class GoveeLedStudio extends HTMLElement {
   static getStubConfig() {
     return {
@@ -53,6 +59,7 @@ class GoveeLedStudio extends HTMLElement {
     this._h6069 ||= Array(this.config.h6069_panel_count || DEFAULT_H6069_PANELS).fill(BLACK);
     this._h70 ||= Array(H70_PIXELS).fill(BLACK);
     this._gifFrames ||= [];
+    this._galleryItems ||= [];
     this._render();
   }
 
@@ -65,6 +72,7 @@ class GoveeLedStudio extends HTMLElement {
       this._topologySignature = signature;
       this._paintH6069();
     }
+    if (this._rendered && !this._galleryLoaded && !this._galleryLoading) this._loadGallery();
   }
 
   getCardSize() {
@@ -125,7 +133,7 @@ class GoveeLedStudio extends HTMLElement {
             <div>
               <div class="eyebrow">ANIMATIE</div>
               <h2>GIF naar 20 × 26 leds</h2>
-              <p>De GIF wordt lokaal in je browser verkleind. Het bestand wordt nergens opgeslagen.</p>
+              <p>De GIF wordt lokaal in je browser verkleind. Alleen met “GIF opslaan” bewaar je de LED-animatie in Home Assistant.</p>
             </div>
             <label class="upload" id="drop-zone">
               <input id="gif-file" type="file" accept="image/gif">
@@ -166,11 +174,29 @@ class GoveeLedStudio extends HTMLElement {
             </div>
           </div>
         </main>
+
+        <section class="gallery-panel">
+          <div class="gallery-heading">
+            <div>
+              <div class="eyebrow">GALERIJ</div>
+              <h2>Bewaar je LED-art</h2>
+              <p>Opgeslagen in Home Assistant en beschikbaar op al je apparaten.</p>
+            </div>
+            <div class="gallery-save">
+              <input id="gallery-name" maxlength="64" placeholder="Naam van je ontwerp" aria-label="Naam van je ontwerp">
+              <button class="primary" id="gallery-save-art">Ontwerp opslaan</button>
+              <button id="gallery-save-gif" disabled>GIF opslaan</button>
+            </div>
+          </div>
+          <div class="gallery-list" id="gallery-list"><p>Galerij laden…</p></div>
+        </section>
       </ha-card>`;
     this._rendered = true;
     this._bindEvents();
     this._paintH70();
     this._paintH6069();
+    this._renderGallery();
+    if (this._hass && !this._galleryLoaded && !this._galleryLoading) this._loadGallery();
   }
 
   _bindEvents() {
@@ -203,6 +229,8 @@ class GoveeLedStudio extends HTMLElement {
     root.querySelector("#gif-file").addEventListener("change", (event) => this._loadGif(event.target.files?.[0]));
     root.querySelector("#gif-play").addEventListener("click", () => this._playGif());
     root.querySelector("#gif-stop").addEventListener("click", () => this._stopGif());
+    root.querySelector("#gallery-save-art").addEventListener("click", () => this._saveGallery("art"));
+    root.querySelector("#gallery-save-gif").addEventListener("click", () => this._saveGallery("animation"));
   }
 
   _showTab(tab) {
@@ -345,6 +373,7 @@ class GoveeLedStudio extends HTMLElement {
       info.textContent = `${file.name} · ${frames.length} frames · klaar om af te spelen`;
       this.shadowRoot.querySelector("#gif-play").disabled = false;
       this.shadowRoot.querySelector("#gif-stop").disabled = false;
+      this.shadowRoot.querySelector("#gallery-save-gif").disabled = false;
       this._setStatus("GIF gereed");
     } catch (error) {
       info.textContent = "Deze GIF kon niet worden gelezen.";
@@ -407,6 +436,114 @@ class GoveeLedStudio extends HTMLElement {
     if (button) button.textContent = "▶ Afspelen";
   }
 
+  async _loadGallery(force = false) {
+    if (!this._hass?.callWS || (this._galleryLoaded && !force)) return;
+    this._galleryLoading = true;
+    try {
+      const result = await this._hass.callWS({ type: "govee_led_control/gallery/list" });
+      this._galleryItems = Array.isArray(result?.items) ? result.items : [];
+      this._galleryLoaded = true;
+      this._renderGallery();
+    } catch (error) {
+      const list = this.shadowRoot?.querySelector("#gallery-list");
+      if (list) list.innerHTML = "<p>De galerij is beschikbaar na de update en herstart van Home Assistant.</p>";
+      this._setStatus(error?.message || "Galerij laden mislukt", true);
+    } finally {
+      this._galleryLoading = false;
+    }
+  }
+
+  async _saveGallery(kind) {
+    const input = this.shadowRoot.querySelector("#gallery-name");
+    const name = input.value.trim();
+    if (!name) {
+      input.focus();
+      return this._setStatus("Geef je ontwerp eerst een naam", true);
+    }
+    if (kind === "animation" && !this._gifFrames.length) return this._setStatus("Laad eerst een GIF", true);
+
+    const target = kind === "animation" || this._tab === "curtain" ? "h70b3" : "h6069";
+    const item = { name, kind, target, brightness: this._brightness };
+    if (kind === "animation") {
+      item.frames = this._gifFrames.map((frame) => ({ colors: [...frame.colors], duration: frame.duration }));
+    } else {
+      item.colors = [...(target === "h70b3" ? this._h70 : this._h6069)];
+    }
+
+    this._setStatus("Ontwerp opslaan…");
+    try {
+      await this._hass.callWS({ type: "govee_led_control/gallery/save", item });
+      input.value = "";
+      await this._loadGallery(true);
+      this._setStatus(kind === "animation" ? "GIF opgeslagen" : "Ontwerp opgeslagen");
+    } catch (error) {
+      this._setStatus(error?.message || "Opslaan mislukt", true);
+    }
+  }
+
+  _renderGallery() {
+    const list = this.shadowRoot?.querySelector("#gallery-list");
+    if (!list) return;
+    if (!this._galleryItems.length) {
+      list.innerHTML = "<p>Nog geen ontwerpen opgeslagen.</p>";
+      return;
+    }
+    list.innerHTML = this._galleryItems.map((item) => {
+      const colors = item.kind === "animation" ? item.frames?.[0]?.colors : item.colors;
+      const palette = [...new Set(Array.isArray(colors) ? colors : [])].slice(0, 8);
+      const detail = item.kind === "animation"
+        ? `GIF · ${item.frames?.length || 0} frames`
+        : item.target === "h70b3" ? "H70B3 gordijn" : "H6069 panelen";
+      return `<article class="gallery-item">
+        <div class="gallery-preview">${palette.map((color) => `<span style="--preview:${color}"></span>`).join("")}</div>
+        <div class="gallery-meta"><strong>${escapeHtml(item.name)}</strong><small>${detail}</small></div>
+        <button data-gallery-load="${item.id}">Laden</button>
+        <button class="danger compact" data-gallery-delete="${item.id}" aria-label="${escapeHtml(item.name)} verwijderen">Verwijderen</button>
+      </article>`;
+    }).join("");
+    list.querySelectorAll("[data-gallery-load]").forEach((button) => button.addEventListener("click", () => this._openGalleryItem(button.dataset.galleryLoad)));
+    list.querySelectorAll("[data-gallery-delete]").forEach((button) => button.addEventListener("click", () => this._deleteGalleryItem(button.dataset.galleryDelete)));
+  }
+
+  _openGalleryItem(itemId) {
+    const item = this._galleryItems.find((candidate) => candidate.id === itemId);
+    if (!item) return;
+    this._brightness = clamp(Number(item.brightness) || 100, 1, 100);
+    this.shadowRoot.querySelector("#brightness").value = this._brightness;
+    this.shadowRoot.querySelector("#brightness-value").textContent = `${this._brightness}%`;
+    if (item.target === "h6069") {
+      this._h6069 = Array.from({ length: this._h6069.length }, (_, index) => item.colors?.[index] || BLACK);
+      this._paintH6069();
+      this._showTab("panels");
+    } else {
+      if (item.kind === "animation") {
+        this._gifFrames = item.frames.map((frame) => ({ colors: [...frame.colors], duration: frame.duration }));
+        this._h70 = [...this._gifFrames[0].colors];
+        this.shadowRoot.querySelector("#gif-info").textContent = `${item.name} · ${this._gifFrames.length} opgeslagen frames`;
+        this.shadowRoot.querySelector("#gif-play").disabled = false;
+        this.shadowRoot.querySelector("#gif-stop").disabled = false;
+        this.shadowRoot.querySelector("#gallery-save-gif").disabled = false;
+      } else {
+        this._h70 = [...item.colors];
+      }
+      this._paintH70();
+      this._showTab("curtain");
+    }
+    this._setStatus(`${item.name} geladen`);
+  }
+
+  async _deleteGalleryItem(itemId) {
+    const item = this._galleryItems.find((candidate) => candidate.id === itemId);
+    if (!item || !window.confirm(`“${item.name}” definitief uit de galerij verwijderen?`)) return;
+    try {
+      await this._hass.callWS({ type: "govee_led_control/gallery/delete", item_id: itemId });
+      await this._loadGallery(true);
+      this._setStatus("Ontwerp verwijderd");
+    } catch (error) {
+      this._setStatus(error?.message || "Verwijderen mislukt", true);
+    }
+  }
+
   _setStatus(message, error = false) {
     const status = this.shadowRoot.querySelector("#status");
     status.classList.toggle("error", error);
@@ -439,8 +576,19 @@ class GoveeLedStudio extends HTMLElement {
       .upload { min-height:115px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border:1px dashed rgba(255,255,255,.25); border-radius:12px; cursor:pointer; background:rgba(120,87,255,.06); } .upload:hover { border-color:var(--accent); } .upload input { display:none; } .upload-icon { font-size:30px; color:#9b86ff; } .upload small { color:#767c8f; }
       .gif-controls { grid-column:1/-1; display:grid; grid-template-columns:1fr 1fr auto auto; gap:12px; align-items:end; } .gif-controls label { display:grid; gap:7px; } select { color:#e8e9ef; background:#222532; border:0; border-radius:8px; padding:9px; } .gif-controls .primary { margin:0; width:auto; } .gif-info { grid-column:1/-1; color:#9297a8; font-size:12px; }
       .panel-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:8px; } .panel-grid button { aspect-ratio:1; min-width:0; padding:0; background:var(--panel); border:1px solid rgba(255,255,255,.18); color:white; text-shadow:0 1px 4px black; } .panel-grid span { font-size:11px; font-weight:800; } .panel-grid .panel-blank { display:block; aspect-ratio:1; } .hint { font-size:12px; text-align:center; }
+      .gallery-panel { border-top:1px solid rgba(255,255,255,.08); padding:24px 26px 28px; background:rgba(255,255,255,.018); }
+      .gallery-heading { display:grid; grid-template-columns:minmax(220px,1fr) minmax(320px,1.5fr); gap:20px; align-items:end; }
+      .gallery-save { display:grid; grid-template-columns:minmax(150px,1fr) auto auto; gap:8px; align-items:center; }
+      .gallery-save input { min-width:0; color:#f7f7fb; background:#222532; border:1px solid rgba(255,255,255,.12); border-radius:10px; padding:10px 12px; }
+      .gallery-save .primary { margin:0; width:auto; }
+      .gallery-list { display:grid; gap:8px; margin-top:18px; } .gallery-list > p { color:#9297a8; font-size:13px; }
+      .gallery-item { display:grid; grid-template-columns:96px minmax(130px,1fr) auto auto; gap:10px; align-items:center; padding:10px; border:1px solid rgba(255,255,255,.08); border-radius:12px; background:rgba(255,255,255,.035); }
+      .gallery-preview { display:flex; height:28px; overflow:hidden; border-radius:7px; background:#030408; } .gallery-preview span { flex:1; background:var(--preview); }
+      .gallery-meta { display:grid; gap:3px; min-width:0; } .gallery-meta strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .gallery-meta small { color:#9297a8; }
+      .danger.compact { margin:0; width:auto; }
       @container(max-width:720px) { header { padding:20px; } .toolbar { grid-template-columns:1fr; padding:16px 20px; } .stage,.gif-panel { grid-template-columns:1fr; } .view { padding:20px; } .gif-controls { grid-template-columns:1fr 1fr; } .panel-grid { grid-template-columns:repeat(5,1fr); } .status { display:none; } }
-      @container(max-width:440px) { .gif-controls,.button-grid { grid-template-columns:1fr; } nav { padding:0 16px; } nav button { padding-inline:8px; } }
+      @container(max-width:720px) { .gallery-heading,.gallery-save { grid-template-columns:1fr; } .gallery-item { grid-template-columns:72px minmax(100px,1fr) auto; } .gallery-item .danger { grid-column:2/-1; } }
+      @container(max-width:440px) { .gif-controls,.button-grid { grid-template-columns:1fr; } nav { padding:0 16px; } nav button { padding-inline:8px; } .gallery-item { grid-template-columns:1fr 1fr; } .gallery-preview,.gallery-meta { grid-column:1/-1; } }
       @media(max-width:700px) { header { padding:20px; } .toolbar { grid-template-columns:1fr; padding:16px 20px; } .stage,.gif-panel { grid-template-columns:1fr; } .view { padding:20px; } .gif-controls { grid-template-columns:1fr 1fr; } .panel-grid { grid-template-columns:repeat(5,1fr); } .status { display:none; } }
     `;
   }

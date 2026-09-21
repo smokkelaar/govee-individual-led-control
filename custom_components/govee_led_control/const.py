@@ -66,3 +66,5 @@ LEVEL_STYLES: Final = (STYLE_BAR, STYLE_POSITION, STYLE_PULSE)
 
 DATA_RUNTIMES: Final = "runtimes"
 DATA_SERVICES_REGISTERED: Final = "services_registered"
+DATA_GALLERY: Final = "gallery"
+DATA_GALLERY_REGISTERED: Final = "gallery_registered"

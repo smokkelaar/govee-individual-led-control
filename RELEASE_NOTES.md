@@ -1,3 +1,14 @@
+# 0.5.0 — opgeslagen LED-art
+
+- LED Studio bevat nu een centrale galerij voor benoemde ontwerpen.
+- Statische H70B3-gordijnbeelden en H6069-paneelontwerpen kunnen worden
+  opgeslagen en later zonder direct verzenden opnieuw in de editor geladen.
+- Verwerkte H70B3-GIF's kunnen inclusief alle LED-frames en timing worden
+  opgeslagen en opnieuw afgespeeld.
+- De galerij wordt in Home Assistant opgeslagen en is daardoor beschikbaar op
+  alle browsers en apparaten die hetzelfde Home Assistant-systeem gebruiken.
+- Verwijderen vereist altijd eerst een bevestiging in de kaart.
+
 # 0.4.1 — responsieve LED Studio
 
 - De kaart gebruikt nu zijn eigen beschikbare breedte in plaats van alleen de

@@ -68,6 +68,16 @@ The card uses the full width of a dashboard section and is container-responsive:
 in a narrow section its controls stack vertically, while a wider section shows
 the LED canvas and controls side by side without clipping.
 
+### Saved artwork gallery
+
+LED Studio includes a gallery stored centrally by Home Assistant. Give the
+current curtain or panel design a name and select **Ontwerp opslaan**. A decoded
+H70B3 GIF can be saved with **GIF opslaan**, including its LED frames and timing.
+Saved items are available from every browser connected to the same Home
+Assistant instance. Loading an item only restores it in the editor; it is not
+sent to the physical lights until the user selects the send or play button.
+Deleting an item always asks for confirmation first.
+
 ```yaml
 type: custom:govee-led-studio
 h6069_transport_entity: sensor.h6069_transport

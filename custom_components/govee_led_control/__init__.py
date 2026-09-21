@@ -57,6 +57,7 @@ from .const import (
     SERVICE_SHOW_ORIENTATION,
     STYLE_BAR,
 )
+from .gallery import async_setup_gallery
 from .h6069_controller import H6069PanelController
 from .h70b3_controller import H70B3Controller
 from .h70b3_protocol import RGB, parse_color
@@ -301,6 +302,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         DOMAIN, {DATA_RUNTIMES: {}, DATA_SERVICES_REGISTERED: False}
     )
     _register_services(hass)
+    await async_setup_gallery(hass)
     await hass.http.async_register_static_paths(
         [StaticPathConfig(_FRONTEND_URL, str(_FRONTEND_FILE), False)]
     )
