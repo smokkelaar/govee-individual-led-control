@@ -143,9 +143,10 @@ Verify the actual Home Assistant entity IDs before adding the views; an existing
 - [AI_HANDOFF.md](AI_HANDOFF.md) — evidence and continuation notes for another AI or developer.
 - [RELEASE_NOTES.md](RELEASE_NOTES.md) — current release notes.
 
-The protocol, topology, crypto and visualization suite currently contains 25 regression tests:
+The protocol, topology, crypto, gallery and visualization suite contains 31 unittest tests, including five invalid-artwork subcases. Install the test dependency first:
 
 ```bash
+python -m pip install cryptography
 python -m unittest discover -s tests -v
 ```
 
