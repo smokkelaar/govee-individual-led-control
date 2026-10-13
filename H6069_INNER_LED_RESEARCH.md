@@ -74,3 +74,33 @@ gebaseerd op de eigen fysieke proef en bevestiging door de gebruiker.
 
 - [Govee H6069-productpagina](https://us.govee.com/products/govee-mini-panel-lights)
 - [Android-documentatie over Bluetooth HCI-opnamen](https://source.android.com/docs/core/connect/bluetooth/verifying_debugging)
+
+## Paneelselectie onderzocht op 14 oktober 2026
+
+Met masker `0001` in beide effectlagen is uitsluitend de bodyvlag
+`singleControl` (offset 2) gewijzigd van 0 naar 1. Upload en activatie kregen
+geldige bevestigingen. Na een eerste onzekere waarneming is dezelfde proef
+45 seconden herhaald. De gebruiker bevestigde dat het licht tussen panelen
+verspringt. Deze proef bewijst geen vast selecteerbaar paneel-ID. Na elke proef
+is het opgeslagen AI-effect hersteld.
+
+De onderzochte effectbody bevat volgens lokale inspectie van de eigen app:
+
+| Bodyoffset | Veld | Bewijs |
+| --- | --- | --- |
+| 0..1 | interne positieselectie | vijf bits fysiek bevestigd |
+| 2 | `singleControl` | wijziging fysiek getest; beweging tussen panelen |
+| 3 | effectrichting | appcode; geen paneel-ID aangetoond |
+| 4 | effectvorm | appcode |
+| 5..8 | twee 2-bytecoördinaten | appcode; gebruikt voor animatiefocus |
+| 9 | actietype | appcode: beweging, flitsen of uitbreiding |
+| 10..11 | lengte van de actiegegevens | appcode en vastgelegde lagen |
+| 12.. | actiegegevens, waaronder kleurpalet | appcode en vastgelegde lagen |
+
+De coördinaten worden door een focusdialoog ingevuld. Ze mogen niet zonder
+verdere proef als paneeladres worden geïnterpreteerd. De onderzochte laag bevat
+geen expliciete lijst van 40 paneel-ID's. De tekenmodus gebruikt de al bekende
+A3-route met commando `03`, met kleur-groepen en indices van volledige panelen.
+De gebruiker bevestigt dat hij in die appfunctie alleen hele panelen kan kiezen.
+Dit sluit andere firmwaremogelijkheden niet uit, maar levert geen referentie
+voor een vaste interne positie op één afzonderlijk paneel.
