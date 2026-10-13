@@ -129,4 +129,5 @@ Vijf interne posities per H6069-paneel zijn fysiek geselecteerd via maskers in e
 vastgelegd `58`-effectprogramma. De proef selecteert dezelfde posities tegelijk op
 alle 40 panelen. De gebruiker bevestigde vijf stappen en uiteindelijk alles donker.
 Zie `H6069_INNER_LED_RESEARCH.md`. Vrije RGB-adressering van 200 interne posities
-is nog niet bewezen; de bit-naar-hoek/middenmapping is ook nog onbekend.
+is nog niet bewezen. Op 14 oktober is de mapping fysiek bevestigd:
+1 linksboven, 2 rechtsboven, 4 rechtsonder, 8 linksonder, 16 midden.

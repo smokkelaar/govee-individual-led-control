@@ -15,8 +15,19 @@ apparaat bevestigde de uploads en activaties zonder het foutpatroon.
 
 Dit bewijst selectie van vijf interne posities, waarbij dezelfde selectie tegelijk
 voor alle panelen geldt. Onafhankelijke RGB-adressering van alle 200 interne
-posities is nog niet bewezen. De koppeling van elk bit aan een specifieke hoek of
-het midden moet nog worden gemeten.
+posities is nog niet bewezen. Bij single-bitproeven op 14 oktober bevestigde de gebruiker:
+
+| Masker | Fysieke positie |
+| --- | --- |
+| `0001` | linksboven |
+| `0002` | rechtsboven |
+| `0004` | rechtsonder |
+| `0008` | linksonder |
+| `0010` | midden |
+
+Alle vijf single-bitproeven zijn door de gebruiker bevestigd.
+De mapping is waargenomen op deze installatie; afwijkende paneeloriëntatie
+kan nader onderzoek vragen.
 
 ## Twee verschillende uploadroutes
 
@@ -49,7 +60,7 @@ bewezen. De overige kleur- en bewegingsvelden zijn nog niet volledig gedecodeerd
 
 ## Vervolg
 
-1. Test afzonderlijke bits om de vier hoeken en het midden te koppelen aan de bits.
+1. Controleer de bovenstaande mapping bij anders georiënteerde panelen.
 2. Controleer dezelfde maskers met een tweede vastgelegd effectprogramma.
 3. Zoek aantoonbare selectie van één paneel binnen deze effectroute.
 4. Bewijs onafhankelijke kleurkeuze per interne positie voordat vrije RGB-bediening wordt toegevoegd.
