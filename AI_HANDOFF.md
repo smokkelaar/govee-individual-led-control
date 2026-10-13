@@ -13,6 +13,16 @@ bedienbaar.
 
 ## Fysiek bewezen feiten — niet opnieuw gokken
 
+### Aanvulling 13 oktober 2026: gewijzigde H6069-aansluitstructuur
+
+Een actuele kaart is via een expliciete versleutelde Bluetoothsessie uitgelezen:
+`33 45 00`, vervolgens `AC 02 00`, antwoordframes tot `AC FF`, afsluiten met
+`33 45 FF`. De LAN-kaart bleef op die installatie verouderd. Zie
+`H6069_BLUETOOTH_TOPOLOGY.md` en `scripts/h6069_bluetooth_topology.py` voor
+herhaling, parsing en cleanup. De korte LAN-antwoorden hieronder zijn
+historische meetresultaten, geen algemene firmwaregarantie. Kleuruploads
+moeten afzonderlijk fysiek worden getest.
+
 ### H6069
 
 - het privé-IP van de geteste installatie is bewust niet gepubliceerd;
@@ -107,7 +117,7 @@ python -m compileall -q custom_components\govee_led_control
 python -m unittest discover -s tests -v
 ```
 
-Er horen 27 protocol-, topologie-, crypto- en visualisatietests te slagen.
+De suite bevat inmiddels 37 tests, inclusief de Bluetooth-kaartuitlezing.
 Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
 komt.
 
