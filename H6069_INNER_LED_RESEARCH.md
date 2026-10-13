@@ -1,56 +1,65 @@
-# H6069: mogelijke afzonderlijke leds binnen één paneel
+# H6069: vijf interne ledposities via een effectmasker
 
-## Aanleiding
+## Fysiek bevestigd op 13 oktober 2026
 
-Tijdens een fouttoestand was in de fysieke H6069-panelen een blauw/groene waas
-zichtbaar waarbij meerdere lichtpunten of zones binnen één cube afzonderlijk
-leken te reageren. Dat is relevante hardware-indicatie, maar nog geen bewijs dat
-Home Assistant, LAN of Bluetooth die emitters rechtstreeks kan adresseren.
+De gebruiker ziet vijf lichtposities per paneel: vier hoeken en een middenpositie.
+Een lokaal vastgelegd AI-effect uit Govee Home bevat twee effectlagen. Door in
+beide lagen het selectiemasker `00 1F` naar `00 1E` te wijzigen, werd één interne
+positie donker in elk van de 40 panelen. Het oorspronkelijke effect werd na deze
+proef automatisch hersteld.
 
-## Wat nu wel bewezen is
+Daarna werden achtereenvolgens de maskers `001E`, `001C`, `0018`, `0010` en
+`0000` toegepast, met ongeveer drie seconden tussen de stappen. De gebruiker
+bevestigde vijf zichtbare stappen en uiteindelijk alle panelen donker. Het
+apparaat bevestigde de uploads en activaties zonder het foutpatroon.
 
-- De statische LAN- en Bluetoothuploads uit de eigen captures gebruiken dezelfde
-  A3-groepering: per groep één RGB-kleur plus een lijst met paneel-ID's 0..39.
-- De fysiek bewezen test met paneel 5 rood en de overige panelen blauw veranderde
-  precies één volledig paneel.
-- De uitgelezen `status.pt`-vorm bevat exact één verbindingsrecord per fysiek
-  paneel. Er staat geen intern 3×3-rooster of subled-ID in deze vormdata.
-- Govee noemt H6069 officieel RGBIC, scenes en pixel-art per lichtpaneel. Dat
-  bevestigt interne effecthardware, maar documenteert geen openbare subpaneel-API.
+Dit bewijst selectie van vijf interne posities, waarbij dezelfde selectie tegelijk
+voor alle panelen geldt. Onafhankelijke RGB-adressering van alle 200 interne
+posities is nog niet bewezen. De koppeling van elk bit aan een specifieke hoek of
+het midden moet nog worden gemeten.
 
-Daarom blijft het stabiele element voorlopig **één fysiek paneel**. De foutwaas
-kan bijvoorbeeld door een lokale paneel-MCU of een vaste diagnostische animatie
-worden gemaakt; externe aanstuurbaarheid volgt daar niet automatisch uit.
+## Twee verschillende uploadroutes
 
-## Veilig vervolgonderzoek
+- De stabiele A3-upload met commando `03` groepeert volledige paneel-ID's per RGB-kleur.
+- De onderzochte A3-upload met commando `58` bevat een gelaagd AI-effectprogramma.
+- De topologie bevat paneelverbindingen; daaruit volgt geen interne ledindeling.
 
-1. Maak een HCI-capture terwijl Govee Home een zelfgemaakt, stilstaand beeld
-   toepast dat aantoonbaar binnen één paneel verschillende kleuren toont. Een
-   ingebouwde scene-ID alleen is onvoldoende bewijs.
-2. Trek bij aangesloten Android-telefoon de dynamische H6069-appmodule uit en
-   zoek naar resolutieconstanten, framebouwers en commando's naast de bekende
-   A3-paneelgroepering.
-3. Vergelijk twee captures die op exact één interne positie verschillen. Alleen
-   het veranderende byteveld wordt kandidaat-adresdata.
-4. Voeg pas na decodeerbare checksums en herhaalbare writes een experimentele
-   encoder toe. Begin met één paneel, lage helderheid en een bekend volledig
-   paneelframe als herstelactie.
-5. Promoveer dit pas naar normale HA-entiteiten wanneer minstens twee interne
-   posities onafhankelijk en herhaalbaar reageren zonder de vormconfiguratie of
-   firmwaremodus te beschadigen.
+De bestaande Home Assistant-bediening blijft gebaseerd op volledige panelen.
+De effectmaskerproef is onderzoek en nog geen geïntegreerde subledfunctie.
 
-## Nog nodig van de fysieke installatie
+## Structuur van het onderzochte effect
 
-De volgende bruikbare meetkans is ofwel de exacte blauw/groene fouttoestand, ofwel
-een Govee-appfunctie waarmee binnen één paneel bewust een vast tweekleurenbeeld
-kan worden gemaakt. Tot die tijd worden geen willekeurige onbekende bytes onderdeel
-van de stabiele integratie.
+De vastgelegde upload bestaat uit vijf A3-frames plus een afzonderlijk
+activatiecommando. Na het samenvoegen begint de effectpayload met `58 01 02`;
+het laatste byte geeft hier twee lagen aan. De eerste payloadbijdrage is
+framebytes `[5:19]`; de vervolgframes dragen bytes `[2:19]` bij.
 
-## Bronnen
+De lagen hebben een subtype, een effectcode en een little-endian bodylengte:
+
+| Laag | Subtype | Effectcode | Bodylengte | Selectiemasker |
+| --- | --- | --- | --- | --- |
+| 1 | 1 | `5A` | 33 | eerste twee bodybytes `00 1F` |
+| 2 | 0 | `5F` | 28 | eerste twee bodybytes `00 1F` |
+
+Alle overige effectbytes bleven tijdens de proeven gelijk. Na wijziging zijn de
+XOR-checksums opnieuw berekend en zijn de frames via de bestaande geauthenticeerde
+E7/AES/RC4-Bluetoothverbinding verstuurd. De vastgelegde activatie begint met
+`33 05 0A 7C 00`; deze waarde is niet als universele activatie voor andere effecten
+bewezen. De overige kleur- en bewegingsvelden zijn nog niet volledig gedecodeerd.
+
+## Vervolg
+
+1. Test afzonderlijke bits om de vier hoeken en het midden te koppelen aan de bits.
+2. Controleer dezelfde maskers met een tweede vastgelegd effectprogramma.
+3. Zoek aantoonbare selectie van één paneel binnen deze effectroute.
+4. Bewijs onafhankelijke kleurkeuze per interne positie voordat vrije RGB-bediening wordt toegevoegd.
+
+Geen nieuwe effectwrites worden automatisch toegevoegd aan setup of reload.
+Volledige Android-foutrapporten, Bluetoothlogs, app-extracties, apparaatadressen en
+sessiesleutels blijven buiten deze repository. De bovenstaande resultaten zijn
+gebaseerd op de eigen fysieke proef en bevestiging door de gebruiker.
+
+## Achtergrond
 
 - [Govee H6069-productpagina](https://us.govee.com/products/govee-mini-panel-lights)
-  — officiële RGBIC-, scene-, Shape Recognition- en paneelclaims.
-- [Officiële ondersteunde Govee API-modellen](https://developer.govee.com/docs/support-product-model)
-  — H6069 staat in de ondersteunde modellijst, zonder publieke subpaneelindeling.
-- `tests/test_h6069_protocol.py` en `tests/test_h6069_topology.py` — vaste,
-  geschoonde referentievectoren uit de eigen fysieke installatie.
+- [Android-documentatie over Bluetooth HCI-opnamen](https://source.android.com/docs/core/connect/bluetooth/verifying_debugging)

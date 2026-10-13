@@ -122,3 +122,11 @@ Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
 komt.
 
 De installatiezip moet bovenaan exact `custom_components/govee_led_control/` bevatten. De ontwikkelaarszip mag documentatie en tests bevatten.
+
+## Bevestigde interne ledposities: 13 oktober 2026
+
+Vijf interne posities per H6069-paneel zijn fysiek geselecteerd via maskers in een
+vastgelegd `58`-effectprogramma. De proef selecteert dezelfde posities tegelijk op
+alle 40 panelen. De gebruiker bevestigde vijf stappen en uiteindelijk alles donker.
+Zie `H6069_INNER_LED_RESEARCH.md`. Vrije RGB-adressering van 200 interne posities
+is nog niet bewezen; de bit-naar-hoek/middenmapping is ook nog onbekend.
