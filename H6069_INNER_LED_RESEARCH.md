@@ -104,3 +104,27 @@ A3-route met commando `03`, met kleur-groepen en indices van volledige panelen.
 De gebruiker bevestigt dat hij in die appfunctie alleen hele panelen kan kiezen.
 Dit sluit andere firmwaremogelijkheden niet uit, maar levert geen referentie
 voor een vaste interne positie op één afzonderlijk paneel.
+
+## Looplicht en focuscoördinaten fysiek bevestigd
+
+Een nieuwe Android-opname bevat het door de gebruiker toegepaste looplicht.
+Het actuele Bluetoothlog bevatte geen H6069-verbinding; de doelupload stond in
+het geroteerde vorige log uit hetzelfde rapport. Alleen de doelwrites zijn
+gefilterd. De volledige rapporten en logs blijven lokaal.
+
+Dit effect gebruikt drie A3-uploadframes met commando `58` en één laag. De laag
+heeft mask `001F`, `singleControl=0`, richting 11, vorm 1, actietype 0 en een
+focuspunt met bytes `40 06 28 06`. De waarden zijn little-endian X=1600 en Y=1576.
+De vastgelegde activatie begint met `33 05 04 F0 46`; bij uitlezen was dezelfde
+scène actief. Het vastgelegde palet bevat rood, groen en blauw.
+
+In een gecontroleerde proef zijn uitsluitend de vier focusbytes veranderd naar
+X=1700, Y=1576. Pakketlengtes, uploadtelling, checksums en onveranderde activatie
+zijn vooraf gevalideerd. De gebruiker bevestigde dat het draaipunt zichtbaar
+verschuift. Na 25 seconden is het vastgelegde looplicht hersteld; upload en
+activatie werden bevestigd.
+
+Hiermee is ruimtelijke besturing van de effectoorsprong bewezen. Een focuspunt
+is nog geen vast adres voor één interne led. Er is nog geen bewezen koppeling
+van deze coördinaten aan alle individuele paneelcentra, geen geselecteerd vast
+paneel-ID in de effectlaag en geen vrije RGB-framebuffer van 200 posities.
