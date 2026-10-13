@@ -117,7 +117,7 @@ python -m compileall -q custom_components\govee_led_control
 python -m unittest discover -s tests -v
 ```
 
-De suite bevat inmiddels 37 tests, inclusief de Bluetooth-kaartuitlezing.
+De suite bevat inmiddels 39 tests, inclusief Bluetooth-kaartuitlezing en dynamische A3-pakketaantallen.
 Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
 komt.
 

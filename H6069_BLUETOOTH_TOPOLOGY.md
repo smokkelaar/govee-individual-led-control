@@ -79,3 +79,14 @@ topology**. LED Studio leest daarna `number_grid` uit de topologiesensor.
 - De opdrachtvolgorde is afgeleid uit de op de eigen Android-telefoon
   geïnstalleerde H6069-appmodule en op eigen hardware gecontroleerd. Appbestanden
   en gedecompileerde appcode worden niet in de repository gepubliceerd.
+
+## Apart opgelost: ongeldige kleurupload
+
+Het opnieuw importeren van de kaart loste het foutpatroon bij een kleurupload
+niet op. De A3-encoder kondigde steeds zes pakketten aan, ook wanneer het
+patroon uit vier of dertien uploadpakketten bestond. De Android-pakketopbouw
+berekent dat aantal dynamisch. Na correctie van zes naar vier bij de demo
+bevestigde de gebruiker: paneel 05 rood, alle andere panelen blauw.
+`h6069_protocol.py` berekent het aantal nu per patroon. Tests controleren
+een effen beeld, de tweekleurendemo, veertig verschillende kleuren en een
+korte transfer met afzonderlijk start- en sluitframe.
