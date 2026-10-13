@@ -117,7 +117,7 @@ python -m compileall -q custom_components\govee_led_control
 python -m unittest discover -s tests -v
 ```
 
-De suite bevat inmiddels 39 tests, inclusief Bluetooth-kaartuitlezing en dynamische A3-pakketaantallen.
+De suite bevat inmiddels 43 tests, inclusief Bluetooth-kaartuitlezing en dynamische A3-pakketaantallen.
 Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
 komt.
 
@@ -131,3 +131,12 @@ alle 40 panelen. De gebruiker bevestigde vijf stappen en uiteindelijk alles donk
 Zie `H6069_INNER_LED_RESEARCH.md`. Vrije RGB-adressering van 200 interne posities
 is nog niet bewezen. Op 14 oktober is de mapping fysiek bevestigd:
 1 linksboven, 2 rechtsboven, 4 rechtsonder, 8 linksonder, 16 midden.
+
+
+## Effectfocus per paneel
+
+Read-only helper: `scripts/h6069_effect_coordinates.py`; vier geometriechecks.
+Paneelafstand24, bboxcentrering1600,1600. Focuspunten paneel05(1660,1660) en
+paneel35(1516,1516) fysiek bevestigd. Andere punten berekend. Minimale Color
+Block Size0 begrenst de onderzochte loop niet tot één paneel. Vrije200RGB blijft
+onbewezen. Zie H6069_INNER_LED_RESEARCH.md.

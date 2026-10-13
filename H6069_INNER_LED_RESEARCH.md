@@ -128,3 +128,34 @@ Hiermee is ruimtelijke besturing van de effectoorsprong bewezen. Een focuspunt
 is nog geen vast adres voor één interne led. Er is nog geen bewezen koppeling
 van deze coördinaten aan alle individuele paneelcentra, geen geselecteerd vast
 paneel-ID in de effectlaag en geen vrije RGB-framebuffer van 200 posities.
+
+## Coördinaten per paneel en begrenzingsproef
+
+De appgeometrie voor vierkante panelen gebruikt een zijde/paneelafstand van 24.
+De bezette paneelkaart wordt rond (1600,1600) gecentreerd. Uit de bevestigde kaart
+kunnen daarom focuspunten per paneel worden berekend. Met twee ver uit elkaar
+liggende fysieke proeven bevestigde de gebruiker:
+
+- paneel 05: X=1660, Y=1660;
+- paneel 35: X=1516, Y=1516.
+
+De overige punten zijn berekend, niet elk afzonderlijk fysiek getest. Het nieuwe
+read-only script `scripts/h6069_effect_coordinates.py` neemt JSON met
+`number_grid`, negeert lege buitenranden en berekent dezelfde geometrie. Het
+verstuurt geen lampcommando's en kent geen RGB-adressen toe.
+
+```powershell
+python scripts/h6069_effect_coordinates.py topology.json --output effect-points.json
+```
+
+De parameter Color Block Size uit de bewegingactie is ook onderzocht. De app
+laat 0..50 toe. Met focus op paneel 05 is uitsluitend de bestaande blokbreedte 1
+naar 0 gewijzigd naast het al geverifieerde focuspunt. De gebruiker zag nog
+steeds licht op meerdere panelen. Dit veld is dus bij deze proef geen begrenzing
+tot één paneel. Alle proeven kregen geldige upload-/activatiebevestigingen en
+herstelden het vastgelegde looplicht automatisch.
+
+Vier nieuwe geometriechecks toetsen beide fysieke referentiepunten, lege
+buitenranden, paneelafstand/origin en ongeldige of dubbele IDs. De volledige
+lokale suite telt nu 43 geslaagde tests. Een vaste interne RGB-positie op één
+paneel blijft nog onbewezen; de coördinaten zijn effectfocuspunten.
