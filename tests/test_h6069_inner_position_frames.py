@@ -13,6 +13,25 @@ spec.loader.exec_module(protocol)
 
 
 class InnerPositionFrameTests(unittest.TestCase):
+    def test_exact_physically_verified_whole_point_overlay(self):
+        frames = protocol.build_whole_point_upload_frames((0, 0, 255), 1, (255, 0, 0))
+        expected = (
+            "a30001045864000201321b00001f0101000000af",
+            "a3010000000f00000000000000010000ff320061",
+            "a30200646400321b000001000100000000000088",
+            "a3ff0f0000000000000001ff000032000064649f",
+        )
+        self.assertEqual(tuple(bytes.fromhex(f) for f in expected), frames)
+
+    def test_overlay_rejects_invalid_selection_and_background(self):
+        for mask in (0, 32, -1, True):
+            with self.subTest(mask=mask), self.assertRaises(ValueError):
+                protocol.build_whole_point_upload_frames((0, 0, 255), mask, (255, 0, 0))
+        for background, point in (((0, 0), (0, 0, 0)), ((0, 0, 256), (0, 0, 0)),
+                                  ((0, 0, 0), (0, -1, 0)), ((0, 0, 0), (0, 0, True))):
+            with self.subTest(background=background, point=point), self.assertRaises(ValueError):
+                protocol.build_whole_point_upload_frames(background, 1, point)
+
     def test_exact_physically_verified_three_color_program(self):
         frames = protocol.build_upload_frames([(1, (255, 0, 0)), (2, (0, 255, 0)), (4, (0, 0, 255))])
         expected = (

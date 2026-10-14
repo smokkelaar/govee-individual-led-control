@@ -323,3 +323,82 @@ deze proef dus niet de vaste blauwe paneelkleuren. Het is geen overlay over
 het andere outputpad. Ook deze volgorde bewijst geen interne selectie die een
 bestaande individuele kleurkaart per paneel intact laat. Herstel: opgeslagen
 looplicht en vooraf uitgelezen globale helderheid20%.
+
+
+## Brede presetopname:62 toepassingen,60 effectkeuzes
+
+De gebruiker paste achter elkaar meer dan20 presets toe. De gecombineerde
+huidige en vorige Android-HCI-logs leverden62 volledige uploads en62 activaties:
+57 A3/58-interne ontwerpen en5 A3/41-muziektoepassingen. De vijf muziektoepassingen
+gebruikten drie effectkeuzes met parameterwijzigingen; totaal60 verschillende
+keuzes. Alle uploadaantallen, indexvolgorde en checksums zijn geldig. Alle62
+uploadantwoorden hebben nulstatus. De57 interne ontwerpen bevatten68 lagen.
+Er is in deze bekende formaten geen expliciete lijst van200 afzonderlijke
+RGB-adressen aangetroffen. Dit sluit andere formaten niet uit.
+
+De analyse gebruikt de toepassingvolgorde. De ruwe HCI-klok is niet betrouwbaar
+als UTC gecalibreerd, dus publiceer geen absolute tijden als bewezen UTC.
+Volledige Androidlogs, APK-data en sessiesleutels blijven lokaal; er zijn geen
+camerabeelden gemaakt. De decoder volgt verbindingsopbouw en beëindiging zodat
+hergebruik van een BLE-handle geen ongerelateerd verkeer in de analyse brengt.
+
+Drie eigen hardwareherhalingen gebruikten exact de opgenomen pakketten, ieder
+60 seconden en met daarna herstel van de laatste preset uit de reeks:
+
+| Toepassing | Effect-ID | Opgenomen structuur | Gebruikerswaarneming |
+| --- | --- | --- | --- |
+| 09 |46F2 | twee lagen, richting8/9, beide mask31; tweede headerwaarde5 | gele horizontale lijnen op/neer en paars links/rechts; kruisen in midden |
+| 17 |4748 | twee actie2-lagen, mask26/21, richting12 | interne posities wisselen in een herhalende reeks, telkens andere kleuren |
+| 55 |4707 | Whole-vlag1 op mask31/beweging; Point-vlag0 op mask21/knipperen | hele panelen bewegen, tussendoor rode/gele interne leds |
+
+Headerwaarde5 van46F2 valt buiten de bekende DIY-prioriteitskeuzes0/1/2. De
+werking ervan is nog niet bewezen; noem deze waarde niet automatisch een
+mengmodus. Whole/Point-compositie van4707 is fysiek bevestigd binnen hetzelfde
+programma. Dit verschilt van het al geteste achtereenvolgens activeren van
+vaste paneelkleuren en een ander intern effect, waarbij de vaste kleuren verdwijnen.
+Het is nog geen bewijs van willekeurige RGB-keuzes per interne positie per paneel.
+
+Na de presetreeks is het laatst gekozen patroon48B6 de herstelreferentie,
+geen eerder opgeslagen looplicht46F0. De helderheid vooraf is steeds uitgelezen
+als20%; de herhalingen gebruikten tijdelijk100% en herstelden de oorspronkelijke
+waarde. De nieuwe vervolgproef construeert een vaste Whole-blauwe laag en een
+vaste Point-rode linksbovenlaag binnen één A3/58-programma. Het resultaat wordt
+apart vastgelegd; de ongewijzigde58-referentieencoder kent nog alleen bewezen
+onderling gescheiden posities op alle panelen.
+
+
+### Bevestigd: vaste paneellaag met een interne hoek erboven
+
+Een eigen tweelagenprogramma is opgebouwd uit de Whole/Point-structuur van4707
+en de eerder geteste vaste bewegingactie: één kleur, Color Block Size50, geen
+zwarte ruimte, geen fade, vaste helderheid100. Beide lagen gebruiken richting1.
+De blauwe Whole-laag selecteert mask31; de rode Point-laag mask1.
+
+Eerste proef: blauw prioriteit0, rood prioriteit1. Gebruiker zag alles stabiel
+blauw. Tweede proef veranderde uitsluitend de twee prioriteitsbytes: blauw1,
+rood0. Gebruiker bevestigde **blauwe panelen met linksboven een rode led, alles
+stabiel**. Beide proeven duurden60 seconden en kregen A35800 en330500 terug.
+Hier bepaalt de prioriteitswissel dus of de interne rode hoek zichtbaar is boven
+de blauwe paneellaag. Het is een compositie binnen hetzelfde A3/58-programma,
+geen behoud van een oude A3/03-patroonkaart uit een andere modus.
+
+De keuzes gelden tegelijk op alle panelen. Er is nog geen aangetoonde parameter
+om een specifieke interne positie op één gekozen paneel willekeurig RGB te geven.
+Ook andere kleuren of maskcombinaties dan de genoemde referentie zijn niet alle
+fysiek getest. De onbekende headerwaarde5 uit46F2 is hiermee niet verklaard.
+
+`scripts/h6069_inner_position_frames.py` bewaart een pure referentie:
+
+```python
+frames = build_whole_point_upload_frames((0, 0, 255), 1, (255, 0, 0))
+```
+
+De encoder gebruikt blauw/achtergrond Whole-prioriteit1 en punt/voorgrond
+Point-prioriteit0. Activatie blijft een afzonderlijke keuze; de hardwareproef
+gebruikte het opgenomen effectslot4707. Geen hardware-I/O en geen nieuwe
+Home Assistant-transportregistratie. Twee nieuwe tests toetsen de exact fysiek
+gebruikte vier uploadframes en ongeldige selecties/kleuren. Volledige suite52
+tests geslaagd; compilatie en gitdiffcheck geslaagd.
+
+Na de laatste proef is de laatste gebruikerspreset48B6 hersteld, met upload-
+en activatiebevestiging; oorspronkelijke globale helderheid20% teruggezet.
