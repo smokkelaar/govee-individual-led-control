@@ -269,3 +269,43 @@ slotkeuze is niet algemeen bewezen. Elke proef herstelde het opgeslagen looplich
 met beide bevestigingen. Op verzoek duren volgende lichtproeven60 seconden.
 Geen camera gebruikt. Vervolg: ruimtelijke begrenzing of een andere bewezen
 transportvorm vinden die één interne positie op één gekozen paneel kan selecteren.
+
+
+## Ruimtelijke vervolgproeven (14 oktober, telkens60 seconden)
+
+De globale helderheid bleek20%; effectlagen en RGB-waarden stonden al op100%
+respectievelijk255. Voor de heldere vervolgproeven is de globale helderheid
+naar100% gezet en na afloop weer naar20%. Herstel omvat steeds het opgeslagen
+looplicht plus oorspronkelijke helderheid. Geen camera gebruikt.
+
+| Programma | Gebruikerswaarneming | Uploadantwoord |
+| --- | --- | --- |
+| Richting6 (gather), focus paneel05, mask1, Color Block Size0 | niets zichtbaar | A35800 |
+| Zelfde focus/mask, breedte1, Black Size2, helderheid100% | linksboven op veel panelen wisselt voortdurend | A35800 |
+| Zelfde, actie-direction2 en offsetbytes(0,100) | hetzelfde effect | A35800 |
+| Zelfde, offsetbytes(0,1) | alles donker | A35800 |
+| Zelfde kleine offset, mask16 voor middenpositie | alles donker | A35800 |
+
+Breedte en globale helderheid zijn tussen de eerste twee proeven tegelijk
+gewijzigd. Die vergelijking maakt dus niet uit welk van beide de eerste donkere
+proef verklaart. De offsetbytes zijn letterlijk genoteerd: de app slaat ze op
+als een array van twee bytes. Hun eenheid en betekenis zijn niet fysiek bewezen.
+De ruimtelijke-bereikhypothese blijft onbewezen; ook het midden bij het gekozen
+focuspunt licht niet op met(0,1). Niet presenteren als paneel-ID, radius, percentage
+of gefixeerde animatiefase. De code wist deze bytes wanneer actie-direction niet2
+is. Voorbeeldwaarden(0,100) komen uit een eigen lokaal onderzocht appvoorbeeld.
+
+Een afzonderlijke compositieproef zette eerst het bekende interne mask1-programma
+via Bluetooth, daarna de vaste A3/03-paneelkleuren rechtstreeks via dezelfde
+Bluetoothverbinding: paneel05 rood255, alle overige panelen zwart. Beide uploads
+en activaties werden bevestigd. De gebruiker bevestigde **heel paneel05 rood**.
+Het interne effectmasker filtert dus ook dit vaste Bluetooth-outputpad niet in
+deze proef. Dit is een fysiek geverifieerde volledige-paneelwrite over Bluetooth,
+geen bewijs van een intern RGB-adres. Het sluit een ander onbekend formaat niet uit.
+
+De onderzochte appencoder voor vaste kleuren groepeert RGB en paneelindexen.
+Het H6069-tekenscherm gebruikt de paneeltelling en paneelvormen; er is in dit pad
+geen aangetoonde afzonderlijke interne-positieparameter. Experimentele wijzigingen
+zijn niet naar Home Assistant gedeployed. Vervolg vereist een aangetoond ander
+adresformaat of een beter verklaarde ruimtelijke selectie, niet alleen een hoger
+zoneaantal. Stabiele interne kleurgroepen uit de vorige proef blijven geldig.
