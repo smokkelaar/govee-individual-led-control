@@ -208,3 +208,13 @@ gebruikt. `scripts/h6069_razer_frames.py` bewaart de pure referentie-encoder voo
 - [Segmentstatus bij H6061/H6088](https://github.com/mpalczew/govee-ble-segments/blob/main/docs/status-read.md): aanleiding voor de AA A5-uitleesproef; H6069-resultaten zijn eigen metingen.
 - [Govee toolkit LAN-protocol](https://github.com/damient/govee-toolkit/blob/main/docs/protocol/lan.md): Razer-frameopbouw en onderscheid tussen modelondersteuning en zoneaantal.
 - [Razer-referentieprotocol](https://github.com/bochelork/govee_razer_led/blob/main/PROTOCOL.md): aanvullende bron voor inschakelen en RGB-zones.
+
+### Combinatie van intern masker en LAN-stream
+
+Voor de laatste proef is het vastgelegde looplicht met intern masker `0001`
+geactiveerd, waarna de Razer-stream met40 zones is ingeschakeld. Alleen zone5
+was rood; de overige39 zones waren zwart. De gebruiker verduidelijkte dat één
+volledig paneel rechtsonder rood werd, niet één lichtpunt binnen dat paneel.
+Deze combinatie bewijst dus geen doorgifte van het interne effectmasker naar
+het Razer-outputpad. Ook hier zijn het streamkanaal uitgeschakeld en het
+opgenomen looplicht hersteld, met beide Bluetoothbevestigingen.
