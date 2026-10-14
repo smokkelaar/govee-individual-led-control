@@ -117,7 +117,7 @@ python -m compileall -q custom_components\govee_led_control
 python -m unittest discover -s tests -v
 ```
 
-De suite bevat inmiddels 43 tests, inclusief Bluetooth-kaartuitlezing en dynamische A3-pakketaantallen.
+De suite bevat inmiddels 47 tests, inclusief Bluetooth-kaartuitlezing en dynamische A3-pakketaantallen.
 Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
 komt.
 
@@ -140,3 +140,13 @@ Paneelafstand24, bboxcentrering1600,1600. Focuspunten paneel05(1660,1660) en
 paneel35(1516,1516) fysiek bevestigd. Andere punten berekend. Minimale Color
 Block Size0 begrenst de onderzochte loop niet tot één paneel. Vrije200RGB blijft
 onbewezen. Zie H6069_INNER_LED_RESEARCH.md.
+
+
+## Razer/DreamView en segmentstatus
+
+RazerB0gradient0 is fysiek getest op de40-paneelinstallatie:10zones roodvlak,
+40zones éénvolledigpaneel.41,80en200renderdenniet. Pure referentie-encoder
+`scripts/h6069_razer_frames.py` voert geenI/O uit en wordt nietautomatisch
+alsHAtransport gebruikt. Zone-indexnaar-topologie is nognietbewezen.
+AAA5pagina1..11 antwoordden maar leverden geen actuele40/200RGBkaart.
+Zie H6069_INNER_LED_RESEARCH.md voor proefdetails en bronverwijzingen.

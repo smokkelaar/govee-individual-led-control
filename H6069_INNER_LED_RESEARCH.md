@@ -159,3 +159,52 @@ Vier nieuwe geometriechecks toetsen beide fysieke referentiepunten, lege
 buitenranden, paneelafstand/origin en ongeldige of dubbele IDs. De volledige
 lokale suite telt nu 43 geslaagde tests. Een vaste interne RGB-positie op één
 paneel blijft nog onbewezen; de coördinaten zijn effectfocuspunten.
+
+## Nieuw onderzoek zonder camera: segmentstatus en Razer/DreamView
+
+### Alleen uitlezen
+
+Na de bestaande E7-handshake en `AA 60 01` gaf `AA A5 01` een geldig antwoord.
+Pagina's 1..11 zijn afzonderlijk uitgelezen, zonder effectwrites. Volgens het
+formaat van verwante modellen bevat een pagina vier `LL RR GG BB`-records.
+Op deze H6069 was alleen het eerste record gevuld: helderheid100 en RGB(0,17,255).
+Alle andere records waren nul, terwijl een meerkleurig looplicht actief was.
+Dit is geen aangetoonde actuele kleurkaart van alle40 panelen of200 posities.
+De appcode sluit H6069 ook uit van de nieuwe kleurstripinterceptor die bij de
+oudere paneelmodellen wordt gebruikt.
+
+### Fysieke LAN-streamproeven
+
+Het aparte UDP-kanaal gebruikt JSON `msg.cmd=razer` en Base64 `data.pt`, met
+frames `BB <payloadlengte BE16> <opcode> <payload> <XOR>`.
+`B1 01` schakelt het kanaal in; `B0` bevat gradient0, zoneaantal en RGB-tripletten.
+Na inschakelen is1s gewacht. Frames zijn op5Hz verstuurd, maximaal25s per proef.
+Eén zone was rood (100,0,0), de overige blauw (0,0,100).
+
+| Aantal zones | Rode zone-index | Gebruikerswaarneming |
+| --- | --- | --- |
+| 10 | 1 | één rood vlak tussen blauw |
+| 40 | 5 | één volledig rood paneel |
+| 41 | 5 | donker of foutpatroon |
+| 80 | 10 | donker of foutpatroon |
+| 200 | 25 | alles uit |
+
+De200-zoneproef heeft een payload langer dan255 bytes, maar80 zones blijven
+onder die grens en renderen ook niet. Een verklaring op basis van uitsluitend
+het hoge lengtebyte is daarmee onvoldoende. Op deze fysieke40-paneelinstallatie
+is40 het grootste bewezen zoneaantal en41 het kleinste geteste mislukte aantal.
+Deze meting is geen algemene uitspraak over andere H6069-configuraties.
+De40-zoneproef bewijst paneelbediening via dit kanaal, geen afzonderlijke interne
+RGB-adressering. De paneelnummering van de Razer-zone-index is nog niet apart
+gecontroleerd tegen de topologie.
+
+Na elke proef is `B1 00` verstuurd en het vastgelegde looplicht via Bluetooth
+hersteld, met geldige upload- en activatiebevestigingen. Geen camerabeelden
+gebruikt. `scripts/h6069_razer_frames.py` bewaart de pure referentie-encoder voor
+1..40 zones. Hij voert geen I/O uit en registreert geen nieuwe HA-transportkeuze.
+
+### Bronnen voor de onderzochte hypothesen
+
+- [Segmentstatus bij H6061/H6088](https://github.com/mpalczew/govee-ble-segments/blob/main/docs/status-read.md): aanleiding voor de AA A5-uitleesproef; H6069-resultaten zijn eigen metingen.
+- [Govee toolkit LAN-protocol](https://github.com/damient/govee-toolkit/blob/main/docs/protocol/lan.md): Razer-frameopbouw en onderscheid tussen modelondersteuning en zoneaantal.
+- [Razer-referentieprotocol](https://github.com/bochelork/govee_razer_led/blob/main/PROTOCOL.md): aanvullende bron voor inschakelen en RGB-zones.
