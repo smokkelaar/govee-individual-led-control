@@ -309,3 +309,17 @@ geen aangetoonde afzonderlijke interne-positieparameter. Experimentele wijziging
 zijn niet naar Home Assistant gedeployed. Vervolg vereist een aangetoond ander
 adresformaat of een beter verklaarde ruimtelijke selectie, niet alleen een hoger
 zoneaantal. Stabiele interne kleurgroepen uit de vorige proef blijven geldig.
+
+
+### Omgekeerde volgorde: vaste kleuren, daarna interne hoek
+
+Op verzoek van de gebruiker is ook de omgekeerde volgorde getest. Eerst A3/03
+via Bluetooth: alle40 panelen blauw(0,0,255), inclusief activatie. Na5 seconden
+A3/58: het stabiele interne mask1-programma met rood(255,0,0), inclusief activatie.
+De tweede fase duurde60 seconden op globale helderheid100%. Beide uploads en
+activaties antwoordden met hun gebruikelijke nulstatus. Gebruiker bevestigde:
+linksboven rood, overige posities donker. De interne-effectactivatie behoudt in
+deze proef dus niet de vaste blauwe paneelkleuren. Het is geen overlay over
+het andere outputpad. Ook deze volgorde bewijst geen interne selectie die een
+bestaande individuele kleurkaart per paneel intact laat. Herstel: opgeslagen
+looplicht en vooraf uitgelezen globale helderheid20%.
