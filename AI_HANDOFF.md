@@ -13,6 +13,16 @@ bedienbaar.
 
 ## Fysiek bewezen feiten — niet opnieuw gokken
 
+### Aanvulling 13 oktober 2026: gewijzigde H6069-aansluitstructuur
+
+Een actuele kaart is via een expliciete versleutelde Bluetoothsessie uitgelezen:
+`33 45 00`, vervolgens `AC 02 00`, antwoordframes tot `AC FF`, afsluiten met
+`33 45 FF`. De LAN-kaart bleef op die installatie verouderd. Zie
+`H6069_BLUETOOTH_TOPOLOGY.md` en `scripts/h6069_bluetooth_topology.py` voor
+herhaling, parsing en cleanup. De korte LAN-antwoorden hieronder zijn
+historische meetresultaten, geen algemene firmwaregarantie. Kleuruploads
+moeten afzonderlijk fysiek worden getest.
+
 ### H6069
 
 - het privé-IP van de geteste installatie is bewust niet gepubliceerd;
@@ -107,8 +117,36 @@ python -m compileall -q custom_components\govee_led_control
 python -m unittest discover -s tests -v
 ```
 
-Er horen 27 protocol-, topologie-, crypto- en visualisatietests te slagen.
+De suite bevat inmiddels 47 tests, inclusief Bluetooth-kaartuitlezing en dynamische A3-pakketaantallen.
 Controleer ook JSON en YAML en zorg dat geen `__pycache__` of `.pyc` in de zip
 komt.
 
 De installatiezip moet bovenaan exact `custom_components/govee_led_control/` bevatten. De ontwikkelaarszip mag documentatie en tests bevatten.
+
+## Bevestigde interne ledposities: 13 oktober 2026
+
+Vijf interne posities per H6069-paneel zijn fysiek geselecteerd via maskers in een
+vastgelegd `58`-effectprogramma. De proef selecteert dezelfde posities tegelijk op
+alle 40 panelen. De gebruiker bevestigde vijf stappen en uiteindelijk alles donker.
+Zie `H6069_INNER_LED_RESEARCH.md`. Vrije RGB-adressering van 200 interne posities
+is nog niet bewezen. Op 14 oktober is de mapping fysiek bevestigd:
+1 linksboven, 2 rechtsboven, 4 rechtsonder, 8 linksonder, 16 midden.
+
+
+## Effectfocus per paneel
+
+Read-only helper: `scripts/h6069_effect_coordinates.py`; vier geometriechecks.
+Paneelafstand24, bboxcentrering1600,1600. Focuspunten paneel05(1660,1660) en
+paneel35(1516,1516) fysiek bevestigd. Andere punten berekend. Minimale Color
+Block Size0 begrenst de onderzochte loop niet tot één paneel. Vrije200RGB blijft
+onbewezen. Zie H6069_INNER_LED_RESEARCH.md.
+
+
+## Razer/DreamView en segmentstatus
+
+RazerB0gradient0 is fysiek getest op de40-paneelinstallatie:10zones roodvlak,
+40zones éénvolledigpaneel.41,80en200renderdenniet. Pure referentie-encoder
+`scripts/h6069_razer_frames.py` voert geenI/O uit en wordt nietautomatisch
+alsHAtransport gebruikt. Zone-indexnaar-topologie is nognietbewezen.
+AAA5pagina1..11 antwoordden maar leverden geen actuele40/200RGBkaart.
+Zie H6069_INNER_LED_RESEARCH.md voor proefdetails en bronverwijzingen.

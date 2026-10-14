@@ -48,6 +48,12 @@ six-byte runtime `pt`, not the 129-byte learned map. The button therefore cannot
 replace an import on that firmware and now reports this distinction explicitly.
 The last validated map remains available after a failed probe or restart.
 
+For changed H6069 wiring, an explicit authenticated Bluetooth recognition read
+can retrieve current connection records even when LAN returns the old map.
+See [H6069 Bluetooth topology](H6069_BLUETOOTH_TOPOLOGY.md) for the verified
+procedure and standalone diagnostic script. It does not run automatically and
+does not change the integration's panel-control transport.
+
 ## HACS installation
 
 This repository is ready to use as a HACS custom repository:
@@ -143,7 +149,7 @@ Verify the actual Home Assistant entity IDs before adding the views; an existing
 - [AI_HANDOFF.md](AI_HANDOFF.md) — evidence and continuation notes for another AI or developer.
 - [RELEASE_NOTES.md](RELEASE_NOTES.md) — current release notes.
 
-The protocol, topology, crypto, gallery and visualization suite contains 31 unittest tests, including five invalid-artwork subcases. Install the test dependency first:
+The protocol, topology, Bluetooth topology, crypto, gallery and visualization suite contains 39 unittest tests, including five invalid-artwork subcases. Install the test dependency first:
 
 ```bash
 python -m pip install cryptography

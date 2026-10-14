@@ -17,6 +17,10 @@ Matter is geen elementtransport in deze integratie. De native H70B3-LAN-proeven 
 - Eén wijziging verzendt altijd het complete actuele paneelbeeld.
 - De payload groepeert gelijke RGB-kleuren en wordt in 20-byte A3-frames verdeeld.
 - Ieder frame bevat een XOR-checksum; het laatste A3-dataframe gebruikt index `0xFF`.
+- Byte 3 van het eerste A3-frame bevat het werkelijke aantal uploadframes,
+  inclusief het start- en sluitframe, exclusief de aparte activatie. Dit aantal
+  moet per patroon worden berekend. Een vast aantal van zes gaf een foutpatroon
+  op de onderzochte 40-paneelunit; vier voor de rood/blauwe demo werkte fysiek.
 - Daarna volgt het statische activatieframe met prefix `33 05 0A 20 03`.
 - De frames worden Base64 opgenomen in een compacte Govee `ptReal` JSON-datagram.
 

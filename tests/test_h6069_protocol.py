@@ -40,7 +40,7 @@ class H6069ProtocolTests(unittest.TestCase):
         decoded = json.loads(protocol.build_ptreal_datagram(colors))
         self.assertEqual(
             [
-                "owABBgMAAAAAAAACJwAA/wABAn4=",
+                "owABBAMAAAAAAAACJwAA/wABAnw=",
                 "owEDBAYHCAkKCwwNDg8QERITFLA=",
                 "owIVFhcYGRobHB0eHyAhIiMkJbQ=",
                 "o/8mJwH/AAAFAAAAAAAAAAAAAKY=",
@@ -54,6 +54,29 @@ class H6069ProtocolTests(unittest.TestCase):
             protocol.encode_grouped_payload([])
         with self.assertRaises(ValueError):
             protocol.encode_grouped_payload([(0, 0, 999)])
+
+    def test_upload_count_matches_solid_demo_and_rainbow(self) -> None:
+        patterns = (
+            ([(255, 255, 255)] * 40, 4),
+            ([(255, 0, 0)] + [(0, 0, 255)] * 39, 4),
+            ([(i, 255 - i, i * 3) for i in range(40)], 13),
+        )
+        for colors, expected_count in patterns:
+            with self.subTest(count=expected_count):
+                frames = protocol.build_pattern_frames(colors)
+                self.assertEqual(expected_count, len(frames) - 1)
+                self.assertEqual(expected_count, frames[0][3])
+                self.assertEqual(0, frames[0][1])
+                self.assertEqual(255, frames[-2][1])
+                self.assertTrue(protocol.verify_frame_checksums(frames))
+
+    def test_small_transfer_keeps_start_and_closing_frames(self) -> None:
+        frames = protocol.build_pattern_frames([(255, 0, 0)])
+        self.assertEqual(3, len(frames))
+        self.assertEqual(2, frames[0][3])
+        self.assertEqual(0, frames[0][1])
+        self.assertEqual(255, frames[1][1])
+        self.assertTrue(protocol.verify_frame_checksums(frames))
 
 
 if __name__ == "__main__":

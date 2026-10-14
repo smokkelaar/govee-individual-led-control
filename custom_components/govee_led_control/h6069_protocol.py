@@ -9,12 +9,16 @@ from typing import Iterable, Sequence
 
 RGB = tuple[int, int, int]
 
-_A3_HEADER = bytes((0x01, 0x06, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
+_A3_HEADER = bytes((0x01, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00))
 _A3_DATA_BYTES_PER_FRAME = 17
 _ACTIVATE_BODY = bytes(
     (0x33, 0x05, 0x0A, 0x20, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00,
      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
 )
+
+
+def _upload_frame_count(payload_length: int) -> int:
+    return max(2, (payload_length + _A3_DATA_BYTES_PER_FRAME - 1) // _A3_DATA_BYTES_PER_FRAME)
 
 
 def _validate_rgb(rgb: Sequence[int]) -> RGB:
@@ -58,12 +62,19 @@ def encode_grouped_payload(colors: Sequence[Sequence[int]]) -> bytes:
         payload.append(len(panel_ids))
         payload.extend(rgb)
         payload.extend(panel_ids)
+    # Count upload frames only; the later activation is a separate command.
+    payload[1] = _upload_frame_count(len(payload))
     return bytes(payload)
 
 
 def decode_grouped_payload(payload: bytes, panel_count: int) -> tuple[RGB, ...]:
     """Decode a grouped payload for validation and diagnostics."""
-    if len(payload) < 10 or payload[:9] != _A3_HEADER:
+    if (
+        len(payload) < 10
+        or payload[0] != _A3_HEADER[0]
+        or payload[2:9] != _A3_HEADER[2:]
+        or payload[1] != _upload_frame_count(len(payload))
+    ):
         raise ValueError("Invalid H6069 grouped-payload header")
 
     result: list[RGB | None] = [None] * panel_count
@@ -102,6 +113,8 @@ def encode_a3_frames(payload: bytes) -> tuple[bytes, ...]:
         payload[offset : offset + _A3_DATA_BYTES_PER_FRAME]
         for offset in range(0, len(payload), _A3_DATA_BYTES_PER_FRAME)
     ]
+    if len(chunks) == 1:
+        chunks.append(b"")
     frames: list[bytes] = []
     for index, chunk in enumerate(chunks):
         frame_index = 0xFF if index == len(chunks) - 1 else index

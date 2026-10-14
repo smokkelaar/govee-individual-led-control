@@ -1,56 +1,437 @@
-# H6069: mogelijke afzonderlijke leds binnen één paneel
+# H6069: vijf interne ledposities via een effectmasker
 
-## Aanleiding
+## Fysiek bevestigd op 13 oktober 2026
 
-Tijdens een fouttoestand was in de fysieke H6069-panelen een blauw/groene waas
-zichtbaar waarbij meerdere lichtpunten of zones binnen één cube afzonderlijk
-leken te reageren. Dat is relevante hardware-indicatie, maar nog geen bewijs dat
-Home Assistant, LAN of Bluetooth die emitters rechtstreeks kan adresseren.
+De gebruiker ziet vijf lichtposities per paneel: vier hoeken en een middenpositie.
+Een lokaal vastgelegd AI-effect uit Govee Home bevat twee effectlagen. Door in
+beide lagen het selectiemasker `00 1F` naar `00 1E` te wijzigen, werd één interne
+positie donker in elk van de 40 panelen. Het oorspronkelijke effect werd na deze
+proef automatisch hersteld.
 
-## Wat nu wel bewezen is
+Daarna werden achtereenvolgens de maskers `001E`, `001C`, `0018`, `0010` en
+`0000` toegepast, met ongeveer drie seconden tussen de stappen. De gebruiker
+bevestigde vijf zichtbare stappen en uiteindelijk alle panelen donker. Het
+apparaat bevestigde de uploads en activaties zonder het foutpatroon.
 
-- De statische LAN- en Bluetoothuploads uit de eigen captures gebruiken dezelfde
-  A3-groepering: per groep één RGB-kleur plus een lijst met paneel-ID's 0..39.
-- De fysiek bewezen test met paneel 5 rood en de overige panelen blauw veranderde
-  precies één volledig paneel.
-- De uitgelezen `status.pt`-vorm bevat exact één verbindingsrecord per fysiek
-  paneel. Er staat geen intern 3×3-rooster of subled-ID in deze vormdata.
-- Govee noemt H6069 officieel RGBIC, scenes en pixel-art per lichtpaneel. Dat
-  bevestigt interne effecthardware, maar documenteert geen openbare subpaneel-API.
+Dit bewijst selectie van vijf interne posities, waarbij dezelfde selectie tegelijk
+voor alle panelen geldt. Onafhankelijke RGB-adressering van alle 200 interne
+posities is nog niet bewezen. Bij single-bitproeven op 14 oktober bevestigde de gebruiker:
 
-Daarom blijft het stabiele element voorlopig **één fysiek paneel**. De foutwaas
-kan bijvoorbeeld door een lokale paneel-MCU of een vaste diagnostische animatie
-worden gemaakt; externe aanstuurbaarheid volgt daar niet automatisch uit.
+| Masker | Fysieke positie |
+| --- | --- |
+| `0001` | linksboven |
+| `0002` | rechtsboven |
+| `0004` | rechtsonder |
+| `0008` | linksonder |
+| `0010` | midden |
 
-## Veilig vervolgonderzoek
+Alle vijf single-bitproeven zijn door de gebruiker bevestigd.
+De mapping is waargenomen op deze installatie; afwijkende paneeloriëntatie
+kan nader onderzoek vragen.
 
-1. Maak een HCI-capture terwijl Govee Home een zelfgemaakt, stilstaand beeld
-   toepast dat aantoonbaar binnen één paneel verschillende kleuren toont. Een
-   ingebouwde scene-ID alleen is onvoldoende bewijs.
-2. Trek bij aangesloten Android-telefoon de dynamische H6069-appmodule uit en
-   zoek naar resolutieconstanten, framebouwers en commando's naast de bekende
-   A3-paneelgroepering.
-3. Vergelijk twee captures die op exact één interne positie verschillen. Alleen
-   het veranderende byteveld wordt kandidaat-adresdata.
-4. Voeg pas na decodeerbare checksums en herhaalbare writes een experimentele
-   encoder toe. Begin met één paneel, lage helderheid en een bekend volledig
-   paneelframe als herstelactie.
-5. Promoveer dit pas naar normale HA-entiteiten wanneer minstens twee interne
-   posities onafhankelijk en herhaalbaar reageren zonder de vormconfiguratie of
-   firmwaremodus te beschadigen.
+## Twee verschillende uploadroutes
 
-## Nog nodig van de fysieke installatie
+- De stabiele A3-upload met commando `03` groepeert volledige paneel-ID's per RGB-kleur.
+- De onderzochte A3-upload met commando `58` bevat een gelaagd AI-effectprogramma.
+- De topologie bevat paneelverbindingen; daaruit volgt geen interne ledindeling.
 
-De volgende bruikbare meetkans is ofwel de exacte blauw/groene fouttoestand, ofwel
-een Govee-appfunctie waarmee binnen één paneel bewust een vast tweekleurenbeeld
-kan worden gemaakt. Tot die tijd worden geen willekeurige onbekende bytes onderdeel
-van de stabiele integratie.
+De bestaande Home Assistant-bediening blijft gebaseerd op volledige panelen.
+De effectmaskerproef is onderzoek en nog geen geïntegreerde subledfunctie.
 
-## Bronnen
+## Structuur van het onderzochte effect
+
+De vastgelegde upload bestaat uit vijf A3-frames plus een afzonderlijk
+activatiecommando. Na het samenvoegen begint de effectpayload met `58 01 02`;
+het laatste byte geeft hier twee lagen aan. De eerste payloadbijdrage is
+framebytes `[5:19]`; de vervolgframes dragen bytes `[2:19]` bij.
+
+De lagen hebben een subtype, een effectcode en een little-endian bodylengte:
+
+| Laag | Subtype | Effectcode | Bodylengte | Selectiemasker |
+| --- | --- | --- | --- | --- |
+| 1 | 1 | `5A` | 33 | eerste twee bodybytes `00 1F` |
+| 2 | 0 | `5F` | 28 | eerste twee bodybytes `00 1F` |
+
+Alle overige effectbytes bleven tijdens de proeven gelijk. Na wijziging zijn de
+XOR-checksums opnieuw berekend en zijn de frames via de bestaande geauthenticeerde
+E7/AES/RC4-Bluetoothverbinding verstuurd. De vastgelegde activatie begint met
+`33 05 0A 7C 00`; deze waarde is niet als universele activatie voor andere effecten
+bewezen. De overige kleur- en bewegingsvelden zijn nog niet volledig gedecodeerd.
+
+## Vervolg
+
+1. Controleer de bovenstaande mapping bij anders georiënteerde panelen.
+2. Controleer dezelfde maskers met een tweede vastgelegd effectprogramma.
+3. Zoek aantoonbare selectie van één paneel binnen deze effectroute.
+4. Bewijs onafhankelijke kleurkeuze per interne positie voordat vrije RGB-bediening wordt toegevoegd.
+
+Geen nieuwe effectwrites worden automatisch toegevoegd aan setup of reload.
+Volledige Android-foutrapporten, Bluetoothlogs, app-extracties, apparaatadressen en
+sessiesleutels blijven buiten deze repository. De bovenstaande resultaten zijn
+gebaseerd op de eigen fysieke proef en bevestiging door de gebruiker.
+
+## Achtergrond
 
 - [Govee H6069-productpagina](https://us.govee.com/products/govee-mini-panel-lights)
-  — officiële RGBIC-, scene-, Shape Recognition- en paneelclaims.
-- [Officiële ondersteunde Govee API-modellen](https://developer.govee.com/docs/support-product-model)
-  — H6069 staat in de ondersteunde modellijst, zonder publieke subpaneelindeling.
-- `tests/test_h6069_protocol.py` en `tests/test_h6069_topology.py` — vaste,
-  geschoonde referentievectoren uit de eigen fysieke installatie.
+- [Android-documentatie over Bluetooth HCI-opnamen](https://source.android.com/docs/core/connect/bluetooth/verifying_debugging)
+
+## Paneelselectie onderzocht op 14 oktober 2026
+
+Met masker `0001` in beide effectlagen is uitsluitend de bodyvlag
+`singleControl` (offset 2) gewijzigd van 0 naar 1. Upload en activatie kregen
+geldige bevestigingen. Na een eerste onzekere waarneming is dezelfde proef
+45 seconden herhaald. De gebruiker bevestigde dat het licht tussen panelen
+verspringt. Deze proef bewijst geen vast selecteerbaar paneel-ID. Na elke proef
+is het opgeslagen AI-effect hersteld.
+
+De onderzochte effectbody bevat volgens lokale inspectie van de eigen app:
+
+| Bodyoffset | Veld | Bewijs |
+| --- | --- | --- |
+| 0..1 | interne positieselectie | vijf bits fysiek bevestigd |
+| 2 | `singleControl` | wijziging fysiek getest; beweging tussen panelen |
+| 3 | effectrichting | appcode; geen paneel-ID aangetoond |
+| 4 | effectvorm | appcode |
+| 5..8 | twee 2-bytecoördinaten | appcode; gebruikt voor animatiefocus |
+| 9 | actietype | appcode: beweging, flitsen of uitbreiding |
+| 10..11 | lengte van de actiegegevens | appcode en vastgelegde lagen |
+| 12.. | actiegegevens, waaronder kleurpalet | appcode en vastgelegde lagen |
+
+De coördinaten worden door een focusdialoog ingevuld. Ze mogen niet zonder
+verdere proef als paneeladres worden geïnterpreteerd. De onderzochte laag bevat
+geen expliciete lijst van 40 paneel-ID's. De tekenmodus gebruikt de al bekende
+A3-route met commando `03`, met kleur-groepen en indices van volledige panelen.
+De gebruiker bevestigt dat hij in die appfunctie alleen hele panelen kan kiezen.
+Dit sluit andere firmwaremogelijkheden niet uit, maar levert geen referentie
+voor een vaste interne positie op één afzonderlijk paneel.
+
+## Looplicht en focuscoördinaten fysiek bevestigd
+
+Een nieuwe Android-opname bevat het door de gebruiker toegepaste looplicht.
+Het actuele Bluetoothlog bevatte geen H6069-verbinding; de doelupload stond in
+het geroteerde vorige log uit hetzelfde rapport. Alleen de doelwrites zijn
+gefilterd. De volledige rapporten en logs blijven lokaal.
+
+Dit effect gebruikt drie A3-uploadframes met commando `58` en één laag. De laag
+heeft mask `001F`, `singleControl=0`, richting 11, vorm 1, actietype 0 en een
+focuspunt met bytes `40 06 28 06`. De waarden zijn little-endian X=1600 en Y=1576.
+De vastgelegde activatie begint met `33 05 04 F0 46`; bij uitlezen was dezelfde
+scène actief. Het vastgelegde palet bevat rood, groen en blauw.
+
+In een gecontroleerde proef zijn uitsluitend de vier focusbytes veranderd naar
+X=1700, Y=1576. Pakketlengtes, uploadtelling, checksums en onveranderde activatie
+zijn vooraf gevalideerd. De gebruiker bevestigde dat het draaipunt zichtbaar
+verschuift. Na 25 seconden is het vastgelegde looplicht hersteld; upload en
+activatie werden bevestigd.
+
+Hiermee is ruimtelijke besturing van de effectoorsprong bewezen. Een focuspunt
+is nog geen vast adres voor één interne led. Er is nog geen bewezen koppeling
+van deze coördinaten aan alle individuele paneelcentra, geen geselecteerd vast
+paneel-ID in de effectlaag en geen vrije RGB-framebuffer van 200 posities.
+
+## Coördinaten per paneel en begrenzingsproef
+
+De appgeometrie voor vierkante panelen gebruikt een zijde/paneelafstand van 24.
+De bezette paneelkaart wordt rond (1600,1600) gecentreerd. Uit de bevestigde kaart
+kunnen daarom focuspunten per paneel worden berekend. Met twee ver uit elkaar
+liggende fysieke proeven bevestigde de gebruiker:
+
+- paneel 05: X=1660, Y=1660;
+- paneel 35: X=1516, Y=1516.
+
+De overige punten zijn berekend, niet elk afzonderlijk fysiek getest. Het nieuwe
+read-only script `scripts/h6069_effect_coordinates.py` neemt JSON met
+`number_grid`, negeert lege buitenranden en berekent dezelfde geometrie. Het
+verstuurt geen lampcommando's en kent geen RGB-adressen toe.
+
+```powershell
+python scripts/h6069_effect_coordinates.py topology.json --output effect-points.json
+```
+
+De parameter Color Block Size uit de bewegingactie is ook onderzocht. De app
+laat 0..50 toe. Met focus op paneel 05 is uitsluitend de bestaande blokbreedte 1
+naar 0 gewijzigd naast het al geverifieerde focuspunt. De gebruiker zag nog
+steeds licht op meerdere panelen. Dit veld is dus bij deze proef geen begrenzing
+tot één paneel. Alle proeven kregen geldige upload-/activatiebevestigingen en
+herstelden het vastgelegde looplicht automatisch.
+
+Vier nieuwe geometriechecks toetsen beide fysieke referentiepunten, lege
+buitenranden, paneelafstand/origin en ongeldige of dubbele IDs. De volledige
+lokale suite telt nu 43 geslaagde tests. Een vaste interne RGB-positie op één
+paneel blijft nog onbewezen; de coördinaten zijn effectfocuspunten.
+
+## Nieuw onderzoek zonder camera: segmentstatus en Razer/DreamView
+
+### Alleen uitlezen
+
+Na de bestaande E7-handshake en `AA 60 01` gaf `AA A5 01` een geldig antwoord.
+Pagina's 1..11 zijn afzonderlijk uitgelezen, zonder effectwrites. Volgens het
+formaat van verwante modellen bevat een pagina vier `LL RR GG BB`-records.
+Op deze H6069 was alleen het eerste record gevuld: helderheid100 en RGB(0,17,255).
+Alle andere records waren nul, terwijl een meerkleurig looplicht actief was.
+Dit is geen aangetoonde actuele kleurkaart van alle40 panelen of200 posities.
+De appcode sluit H6069 ook uit van de nieuwe kleurstripinterceptor die bij de
+oudere paneelmodellen wordt gebruikt.
+
+### Fysieke LAN-streamproeven
+
+Het aparte UDP-kanaal gebruikt JSON `msg.cmd=razer` en Base64 `data.pt`, met
+frames `BB <payloadlengte BE16> <opcode> <payload> <XOR>`.
+`B1 01` schakelt het kanaal in; `B0` bevat gradient0, zoneaantal en RGB-tripletten.
+Na inschakelen is1s gewacht. Frames zijn op5Hz verstuurd, maximaal25s per proef.
+Eén zone was rood (100,0,0), de overige blauw (0,0,100).
+
+| Aantal zones | Rode zone-index | Gebruikerswaarneming |
+| --- | --- | --- |
+| 10 | 1 | één rood vlak tussen blauw |
+| 40 | 5 | één volledig rood paneel |
+| 41 | 5 | donker of foutpatroon |
+| 80 | 10 | donker of foutpatroon |
+| 200 | 25 | alles uit |
+
+De200-zoneproef heeft een payload langer dan255 bytes, maar80 zones blijven
+onder die grens en renderen ook niet. Een verklaring op basis van uitsluitend
+het hoge lengtebyte is daarmee onvoldoende. Op deze fysieke40-paneelinstallatie
+is40 het grootste bewezen zoneaantal en41 het kleinste geteste mislukte aantal.
+Deze meting is geen algemene uitspraak over andere H6069-configuraties.
+De40-zoneproef bewijst paneelbediening via dit kanaal, geen afzonderlijke interne
+RGB-adressering. De paneelnummering van de Razer-zone-index is nog niet apart
+gecontroleerd tegen de topologie.
+
+Na elke proef is `B1 00` verstuurd en het vastgelegde looplicht via Bluetooth
+hersteld, met geldige upload- en activatiebevestigingen. Geen camerabeelden
+gebruikt. `scripts/h6069_razer_frames.py` bewaart de pure referentie-encoder voor
+1..40 zones. Hij voert geen I/O uit en registreert geen nieuwe HA-transportkeuze.
+
+### Bronnen voor de onderzochte hypothesen
+
+- [Segmentstatus bij H6061/H6088](https://github.com/mpalczew/govee-ble-segments/blob/main/docs/status-read.md): aanleiding voor de AA A5-uitleesproef; H6069-resultaten zijn eigen metingen.
+- [Govee toolkit LAN-protocol](https://github.com/damient/govee-toolkit/blob/main/docs/protocol/lan.md): Razer-frameopbouw en onderscheid tussen modelondersteuning en zoneaantal.
+- [Razer-referentieprotocol](https://github.com/bochelork/govee_razer_led/blob/main/PROTOCOL.md): aanvullende bron voor inschakelen en RGB-zones.
+
+### Combinatie van intern masker en LAN-stream
+
+Voor de laatste proef is het vastgelegde looplicht met intern masker `0001`
+geactiveerd, waarna de Razer-stream met40 zones is ingeschakeld. Alleen zone5
+was rood; de overige39 zones waren zwart. De gebruiker verduidelijkte dat één
+volledig paneel rechtsonder rood werd, niet één lichtpunt binnen dat paneel.
+Deze combinatie bewijst dus geen doorgifte van het interne effectmasker naar
+het Razer-outputpad. Ook hier zijn het streamkanaal uitgeschakeld en het
+opgenomen looplicht hersteld, met beide Bluetoothbevestigingen.
+
+
+## Stabiele kleuren op interne posities (14 oktober)
+
+Een eerdere mask0001-proef is opnieuw uitgevoerd: de gebruiker bevestigde
+alleen linksboven binnen ieder paneel. Upload en activatie antwoordden opnieuw
+A35800 en330500. De bestaande interne selectie werkt dus nog.
+
+B4 is ook onderzocht: veertig RGB-plus-gebiedscode-records, eerst alle codes1,
+daarna exact de referentie-indeling (eerste36 code1, overige4 code2). De gebruiker
+zag geen verandering: het looplicht bleef draaien. Dit bewijst geen bruikbare
+B4-bediening op deze installatie; ondersteuning blijft onbekend. De rode cirkel
+na afloop was consistent met het herstelde looplicht; AA05 meldde weer46F0.
+Bron: [SignalRGB referentie](https://github.com/fu-raz/signalrgb-govee-direct-connect/blob/main/GoveeDevice.test.js).
+
+De appinterface begrenst geavanceerde H6069-ontwerpen tot drie lagen. Een eigen
+vijflagenprogramma gaf A35801 en veranderde de bestaande scène niet. Drie lagen
+gaven A35800. Met actie1 bleven de kleuren op hun geselecteerde hoeken maar
+knipperden ze, ondanks gelijke helderheidsgrenzen. Actie0 met één kleur per laag,
+Color Block Size50, Black Size0, geen fade of in-/uitgang en vaste helderheid100
+bleef vervolgens stabiel. De gebruiker bevestigde gedurende de minuutproef:
+
+- mask1: linksboven rood;
+- mask2: rechtsboven groen;
+- mask4: rechtsonder blauw;
+- linksonder en midden donker.
+
+Dit bewijst drie afzonderlijke, constante kleurkeuzes binnen ieder paneel,
+**met dezelfde keuzes op alle panelen**. Het geeft nog geen afzonderlijke
+RGB-adressen voor200 posities en geen vijf onafhankelijke kleuren tegelijk.
+Er zijn geen paneel-IDs in deze effectlagen. Combinatiemaskers kunnen maximaal
+vijf posities over drie kleurgroepen verdelen; die combinaties zijn nog niet
+fysiek getest. De appgrens van drie lagen is geen bewijs van alle firmwaregrenzen.
+
+`scripts/h6069_inner_position_frames.py` bewaart de pure encoder voor deze
+onderzoeksroute. Geen hardware-I/O, geen automatische activatie en geen nieuwe
+HA-transportregistratie. Bijvoorbeeld:
+
+```python
+from scripts.h6069_inner_position_frames import build_upload_frames
+frames = build_upload_frames([
+    (1, (255, 0, 0)), (2, (0, 255, 0)), (4, (0, 0, 255)),
+])
+```
+
+Exact geverifieerd uploadpad: A3 command58, zes uploadframes, daarna afzonderlijk
+activatie330504F046000100 voor de gebruikte opgeslagen effectslot. Een andere
+slotkeuze is niet algemeen bewezen. Elke proef herstelde het opgeslagen looplicht
+met beide bevestigingen. Op verzoek duren volgende lichtproeven60 seconden.
+Geen camera gebruikt. Vervolg: ruimtelijke begrenzing of een andere bewezen
+transportvorm vinden die één interne positie op één gekozen paneel kan selecteren.
+
+
+## Ruimtelijke vervolgproeven (14 oktober, telkens60 seconden)
+
+De globale helderheid bleek20%; effectlagen en RGB-waarden stonden al op100%
+respectievelijk255. Voor de heldere vervolgproeven is de globale helderheid
+naar100% gezet en na afloop weer naar20%. Herstel omvat steeds het opgeslagen
+looplicht plus oorspronkelijke helderheid. Geen camera gebruikt.
+
+| Programma | Gebruikerswaarneming | Uploadantwoord |
+| --- | --- | --- |
+| Richting6 (gather), focus paneel05, mask1, Color Block Size0 | niets zichtbaar | A35800 |
+| Zelfde focus/mask, breedte1, Black Size2, helderheid100% | linksboven op veel panelen wisselt voortdurend | A35800 |
+| Zelfde, actie-direction2 en offsetbytes(0,100) | hetzelfde effect | A35800 |
+| Zelfde, offsetbytes(0,1) | alles donker | A35800 |
+| Zelfde kleine offset, mask16 voor middenpositie | alles donker | A35800 |
+
+Breedte en globale helderheid zijn tussen de eerste twee proeven tegelijk
+gewijzigd. Die vergelijking maakt dus niet uit welk van beide de eerste donkere
+proef verklaart. De offsetbytes zijn letterlijk genoteerd: de app slaat ze op
+als een array van twee bytes. Hun eenheid en betekenis zijn niet fysiek bewezen.
+De ruimtelijke-bereikhypothese blijft onbewezen; ook het midden bij het gekozen
+focuspunt licht niet op met(0,1). Niet presenteren als paneel-ID, radius, percentage
+of gefixeerde animatiefase. De code wist deze bytes wanneer actie-direction niet2
+is. Voorbeeldwaarden(0,100) komen uit een eigen lokaal onderzocht appvoorbeeld.
+
+Een afzonderlijke compositieproef zette eerst het bekende interne mask1-programma
+via Bluetooth, daarna de vaste A3/03-paneelkleuren rechtstreeks via dezelfde
+Bluetoothverbinding: paneel05 rood255, alle overige panelen zwart. Beide uploads
+en activaties werden bevestigd. De gebruiker bevestigde **heel paneel05 rood**.
+Het interne effectmasker filtert dus ook dit vaste Bluetooth-outputpad niet in
+deze proef. Dit is een fysiek geverifieerde volledige-paneelwrite over Bluetooth,
+geen bewijs van een intern RGB-adres. Het sluit een ander onbekend formaat niet uit.
+
+De onderzochte appencoder voor vaste kleuren groepeert RGB en paneelindexen.
+Het H6069-tekenscherm gebruikt de paneeltelling en paneelvormen; er is in dit pad
+geen aangetoonde afzonderlijke interne-positieparameter. Experimentele wijzigingen
+zijn niet naar Home Assistant gedeployed. Vervolg vereist een aangetoond ander
+adresformaat of een beter verklaarde ruimtelijke selectie, niet alleen een hoger
+zoneaantal. Stabiele interne kleurgroepen uit de vorige proef blijven geldig.
+
+
+### Omgekeerde volgorde: vaste kleuren, daarna interne hoek
+
+Op verzoek van de gebruiker is ook de omgekeerde volgorde getest. Eerst A3/03
+via Bluetooth: alle40 panelen blauw(0,0,255), inclusief activatie. Na5 seconden
+A3/58: het stabiele interne mask1-programma met rood(255,0,0), inclusief activatie.
+De tweede fase duurde60 seconden op globale helderheid100%. Beide uploads en
+activaties antwoordden met hun gebruikelijke nulstatus. Gebruiker bevestigde:
+linksboven rood, overige posities donker. De interne-effectactivatie behoudt in
+deze proef dus niet de vaste blauwe paneelkleuren. Het is geen overlay over
+het andere outputpad. Ook deze volgorde bewijst geen interne selectie die een
+bestaande individuele kleurkaart per paneel intact laat. Herstel: opgeslagen
+looplicht en vooraf uitgelezen globale helderheid20%.
+
+
+## Brede presetopname:62 toepassingen,60 effectkeuzes
+
+De gebruiker paste achter elkaar meer dan20 presets toe. De gecombineerde
+huidige en vorige Android-HCI-logs leverden62 volledige uploads en62 activaties:
+57 A3/58-interne ontwerpen en5 A3/41-muziektoepassingen. De vijf muziektoepassingen
+gebruikten drie effectkeuzes met parameterwijzigingen; totaal60 verschillende
+keuzes. Alle uploadaantallen, indexvolgorde en checksums zijn geldig. Alle62
+uploadantwoorden hebben nulstatus. De57 interne ontwerpen bevatten68 lagen.
+Er is in deze bekende formaten geen expliciete lijst van200 afzonderlijke
+RGB-adressen aangetroffen. Dit sluit andere formaten niet uit.
+
+De analyse gebruikt de toepassingvolgorde. De ruwe HCI-klok is niet betrouwbaar
+als UTC gecalibreerd, dus publiceer geen absolute tijden als bewezen UTC.
+Volledige Androidlogs, APK-data en sessiesleutels blijven lokaal; er zijn geen
+camerabeelden gemaakt. De decoder volgt verbindingsopbouw en beëindiging zodat
+hergebruik van een BLE-handle geen ongerelateerd verkeer in de analyse brengt.
+
+Drie eigen hardwareherhalingen gebruikten exact de opgenomen pakketten, ieder
+60 seconden en met daarna herstel van de laatste preset uit de reeks:
+
+| Toepassing | Effect-ID | Opgenomen structuur | Gebruikerswaarneming |
+| --- | --- | --- | --- |
+| 09 |46F2 | twee lagen, richting8/9, beide mask31; tweede headerwaarde5 | gele horizontale lijnen op/neer en paars links/rechts; kruisen in midden |
+| 17 |4748 | twee actie2-lagen, mask26/21, richting12 | interne posities wisselen in een herhalende reeks, telkens andere kleuren |
+| 55 |4707 | Whole-vlag1 op mask31/beweging; Point-vlag0 op mask21/knipperen | hele panelen bewegen, tussendoor rode/gele interne leds |
+
+Headerwaarde5 van46F2 valt buiten de bekende DIY-prioriteitskeuzes0/1/2. De
+werking ervan is nog niet bewezen; noem deze waarde niet automatisch een
+mengmodus. Whole/Point-compositie van4707 is fysiek bevestigd binnen hetzelfde
+programma. Dit verschilt van het al geteste achtereenvolgens activeren van
+vaste paneelkleuren en een ander intern effect, waarbij de vaste kleuren verdwijnen.
+Het is nog geen bewijs van willekeurige RGB-keuzes per interne positie per paneel.
+
+Na de presetreeks is het laatst gekozen patroon48B6 de herstelreferentie,
+geen eerder opgeslagen looplicht46F0. De helderheid vooraf is steeds uitgelezen
+als20%; de herhalingen gebruikten tijdelijk100% en herstelden de oorspronkelijke
+waarde. De nieuwe vervolgproef construeert een vaste Whole-blauwe laag en een
+vaste Point-rode linksbovenlaag binnen één A3/58-programma. Het resultaat wordt
+apart vastgelegd; de ongewijzigde58-referentieencoder kent nog alleen bewezen
+onderling gescheiden posities op alle panelen.
+
+
+### Bevestigd: vaste paneellaag met een interne hoek erboven
+
+Een eigen tweelagenprogramma is opgebouwd uit de Whole/Point-structuur van4707
+en de eerder geteste vaste bewegingactie: één kleur, Color Block Size50, geen
+zwarte ruimte, geen fade, vaste helderheid100. Beide lagen gebruiken richting1.
+De blauwe Whole-laag selecteert mask31; de rode Point-laag mask1.
+
+Eerste proef: blauw prioriteit0, rood prioriteit1. Gebruiker zag alles stabiel
+blauw. Tweede proef veranderde uitsluitend de twee prioriteitsbytes: blauw1,
+rood0. Gebruiker bevestigde **blauwe panelen met linksboven een rode led, alles
+stabiel**. Beide proeven duurden60 seconden en kregen A35800 en330500 terug.
+Hier bepaalt de prioriteitswissel dus of de interne rode hoek zichtbaar is boven
+de blauwe paneellaag. Het is een compositie binnen hetzelfde A3/58-programma,
+geen behoud van een oude A3/03-patroonkaart uit een andere modus.
+
+De keuzes gelden tegelijk op alle panelen. Er is nog geen aangetoonde parameter
+om een specifieke interne positie op één gekozen paneel willekeurig RGB te geven.
+Ook andere kleuren of maskcombinaties dan de genoemde referentie zijn niet alle
+fysiek getest. De onbekende headerwaarde5 uit46F2 is hiermee niet verklaard.
+
+`scripts/h6069_inner_position_frames.py` bewaart een pure referentie:
+
+```python
+frames = build_whole_point_upload_frames((0, 0, 255), 1, (255, 0, 0))
+```
+
+De encoder gebruikt blauw/achtergrond Whole-prioriteit1 en punt/voorgrond
+Point-prioriteit0. Activatie blijft een afzonderlijke keuze; de hardwareproef
+gebruikte het opgenomen effectslot4707. Geen hardware-I/O en geen nieuwe
+Home Assistant-transportregistratie. Twee nieuwe tests toetsen de exact fysiek
+gebruikte vier uploadframes en ongeldige selecties/kleuren. Volledige suite52
+tests geslaagd; compilatie en gitdiffcheck geslaagd.
+
+Na de laatste proef is de laatste gebruikerspreset48B6 hersteld, met upload-
+en activatiebevestiging; oorspronkelijke globale helderheid20% teruggezet.
+
+
+## Drie lagen combineren: één bewegende interne led tegelijk
+
+De volgende proeven combineerden de bewezen Whole-achtergrond en Point-laag
+met ruimtelijke afdekking. Alle proeven duurden60 seconden, upload/activatie
+antwoordden met nulstatus en herstelden gebruikerspreset48B6 en helderheid20%.
+
+1. Achtergrond blauw Whole/prioriteit2; rood Point/mask1/richting1/prioriteit1,
+   breedte1/zwarte ruimte50; blauwe Point-afdekking/mask1/richting3/prioriteit0,
+   breedte50/zwarte ruimte1. Gebruiker zag alleen blauw. Dit bewijst geen
+   ondoorzichtige tussenruimte: overlap en timing waren niet onafhankelijk bepaald.
+2. Controle: rood bleef continu aan (breedte50/ruimte0); blauwe afdekking had
+   breedte1/ruimte2. Gebruiker zag rode linksboven-posities met bewegende verticale
+   blauwe banen erdoorheen; overige posities blauw. De tussenruimte van de hogere
+   laag laat dus in deze compositie de rode lagere laag zichtbaar worden.
+3. Rood breedte1/ruimte8, richting1, snelheid25; blauw breedte8/ruimte1, richting3,
+   snelheid25; zelfde achtergrond en prioriteiten. Gebruiker zag **één rode interne
+   led tegelijk**, enigszins van linksboven naar linksonder op de plaat verspringend,
+   steeds op de linksboven-positie binnen een paneel. De rest bleef blauw.
+4. Alleen beide ruimtelijke snelheden25 naar0 gewijzigd: nog steeds beweging,
+   volgens gebruiker mogelijk trager. Geen gemeten snelheid en geen stilstaand punt.
+
+Dit bewijst een ruimtelijke compositie die op de geteste installatie een enkele
+bewegende interne positie zichtbaar maakt. Het bewijst niet dat iedere positie
+of ieder paneel bereikt wordt, noch een vaste keuze van willekeurige paneel-ID+led.
+De bytewaarden voor breedte/ruimte zijn geen geverifieerde absolute coördinaten.
+
+Pure referentie: `build_spatial_intersection_upload_frames(background_rgb,
+point_rgb)` in `scripts/h6069_inner_position_frames.py`. Fysiek getest met blauw
+achtergrond en rood punt. Mask1 en ruimtelijke instellingen blijven vast in deze
+referentie. Geen I/O of HA-transportregistratie. Exact-wire en kleurvalidatiechecks
+zijn toegevoegd;54 lokale tests, compilatie en gitdiffcheck geslaagd.
