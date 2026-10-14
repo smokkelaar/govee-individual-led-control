@@ -402,3 +402,36 @@ tests geslaagd; compilatie en gitdiffcheck geslaagd.
 
 Na de laatste proef is de laatste gebruikerspreset48B6 hersteld, met upload-
 en activatiebevestiging; oorspronkelijke globale helderheid20% teruggezet.
+
+
+## Drie lagen combineren: één bewegende interne led tegelijk
+
+De volgende proeven combineerden de bewezen Whole-achtergrond en Point-laag
+met ruimtelijke afdekking. Alle proeven duurden60 seconden, upload/activatie
+antwoordden met nulstatus en herstelden gebruikerspreset48B6 en helderheid20%.
+
+1. Achtergrond blauw Whole/prioriteit2; rood Point/mask1/richting1/prioriteit1,
+   breedte1/zwarte ruimte50; blauwe Point-afdekking/mask1/richting3/prioriteit0,
+   breedte50/zwarte ruimte1. Gebruiker zag alleen blauw. Dit bewijst geen
+   ondoorzichtige tussenruimte: overlap en timing waren niet onafhankelijk bepaald.
+2. Controle: rood bleef continu aan (breedte50/ruimte0); blauwe afdekking had
+   breedte1/ruimte2. Gebruiker zag rode linksboven-posities met bewegende verticale
+   blauwe banen erdoorheen; overige posities blauw. De tussenruimte van de hogere
+   laag laat dus in deze compositie de rode lagere laag zichtbaar worden.
+3. Rood breedte1/ruimte8, richting1, snelheid25; blauw breedte8/ruimte1, richting3,
+   snelheid25; zelfde achtergrond en prioriteiten. Gebruiker zag **één rode interne
+   led tegelijk**, enigszins van linksboven naar linksonder op de plaat verspringend,
+   steeds op de linksboven-positie binnen een paneel. De rest bleef blauw.
+4. Alleen beide ruimtelijke snelheden25 naar0 gewijzigd: nog steeds beweging,
+   volgens gebruiker mogelijk trager. Geen gemeten snelheid en geen stilstaand punt.
+
+Dit bewijst een ruimtelijke compositie die op de geteste installatie een enkele
+bewegende interne positie zichtbaar maakt. Het bewijst niet dat iedere positie
+of ieder paneel bereikt wordt, noch een vaste keuze van willekeurige paneel-ID+led.
+De bytewaarden voor breedte/ruimte zijn geen geverifieerde absolute coördinaten.
+
+Pure referentie: `build_spatial_intersection_upload_frames(background_rgb,
+point_rgb)` in `scripts/h6069_inner_position_frames.py`. Fysiek getest met blauw
+achtergrond en rood punt. Mask1 en ruimtelijke instellingen blijven vast in deze
+referentie. Geen I/O of HA-transportregistratie. Exact-wire en kleurvalidatiechecks
+zijn toegevoegd;54 lokale tests, compilatie en gitdiffcheck geslaagd.

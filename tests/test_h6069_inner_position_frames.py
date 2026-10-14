@@ -13,6 +13,28 @@ spec.loader.exec_module(protocol)
 
 
 class InnerPositionFrameTests(unittest.TestCase):
+    def test_exact_physically_verified_moving_intersection(self):
+        frames = protocol.build_spatial_intersection_upload_frames((0, 0, 255), (255, 0, 0))
+        expected = (
+            "a30001065864000302321b00001f0101000000af",
+            "a3010000000f00000000000000010000ff320061",
+            "a30200646401191b0000010001000000000000a2",
+            "a3030f0000000000000001ff0000010800646458",
+            "a30400191b00000100030000000000000f0000a8",
+            "a3ff0000000000010000ff0801006464000000ab",
+        )
+        self.assertEqual(tuple(bytes.fromhex(f) for f in expected), frames)
+
+    def test_intersection_retains_background_and_foreground_channels(self):
+        frames = protocol.build_spatial_intersection_upload_frames((12, 34, 56), (78, 90, 123))
+        payload = frames[0][5:19] + b"".join(f[2:19] for f in frames[1:])
+        self.assertEqual(2, payload.count(bytes((12, 34, 56))))
+        self.assertEqual(1, payload.count(bytes((78, 90, 123))))
+        self.assertEqual(3, payload[2])
+        for background, point in (((0, 0), (0, 0, 0)), ((0, 0, 0), (256, 0, 0))):
+            with self.assertRaises(ValueError):
+                protocol.build_spatial_intersection_upload_frames(background, point)
+
     def test_exact_physically_verified_whole_point_overlay(self):
         frames = protocol.build_whole_point_upload_frames((0, 0, 255), 1, (255, 0, 0))
         expected = (
