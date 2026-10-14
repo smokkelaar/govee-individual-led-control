@@ -218,3 +218,54 @@ volledig paneel rechtsonder rood werd, niet één lichtpunt binnen dat paneel.
 Deze combinatie bewijst dus geen doorgifte van het interne effectmasker naar
 het Razer-outputpad. Ook hier zijn het streamkanaal uitgeschakeld en het
 opgenomen looplicht hersteld, met beide Bluetoothbevestigingen.
+
+
+## Stabiele kleuren op interne posities (14 oktober)
+
+Een eerdere mask0001-proef is opnieuw uitgevoerd: de gebruiker bevestigde
+alleen linksboven binnen ieder paneel. Upload en activatie antwoordden opnieuw
+A35800 en330500. De bestaande interne selectie werkt dus nog.
+
+B4 is ook onderzocht: veertig RGB-plus-gebiedscode-records, eerst alle codes1,
+daarna exact de referentie-indeling (eerste36 code1, overige4 code2). De gebruiker
+zag geen verandering: het looplicht bleef draaien. Dit bewijst geen bruikbare
+B4-bediening op deze installatie; ondersteuning blijft onbekend. De rode cirkel
+na afloop was consistent met het herstelde looplicht; AA05 meldde weer46F0.
+Bron: [SignalRGB referentie](https://github.com/fu-raz/signalrgb-govee-direct-connect/blob/main/GoveeDevice.test.js).
+
+De appinterface begrenst geavanceerde H6069-ontwerpen tot drie lagen. Een eigen
+vijflagenprogramma gaf A35801 en veranderde de bestaande scène niet. Drie lagen
+gaven A35800. Met actie1 bleven de kleuren op hun geselecteerde hoeken maar
+knipperden ze, ondanks gelijke helderheidsgrenzen. Actie0 met één kleur per laag,
+Color Block Size50, Black Size0, geen fade of in-/uitgang en vaste helderheid100
+bleef vervolgens stabiel. De gebruiker bevestigde gedurende de minuutproef:
+
+- mask1: linksboven rood;
+- mask2: rechtsboven groen;
+- mask4: rechtsonder blauw;
+- linksonder en midden donker.
+
+Dit bewijst drie afzonderlijke, constante kleurkeuzes binnen ieder paneel,
+**met dezelfde keuzes op alle panelen**. Het geeft nog geen afzonderlijke
+RGB-adressen voor200 posities en geen vijf onafhankelijke kleuren tegelijk.
+Er zijn geen paneel-IDs in deze effectlagen. Combinatiemaskers kunnen maximaal
+vijf posities over drie kleurgroepen verdelen; die combinaties zijn nog niet
+fysiek getest. De appgrens van drie lagen is geen bewijs van alle firmwaregrenzen.
+
+`scripts/h6069_inner_position_frames.py` bewaart de pure encoder voor deze
+onderzoeksroute. Geen hardware-I/O, geen automatische activatie en geen nieuwe
+HA-transportregistratie. Bijvoorbeeld:
+
+```python
+from scripts.h6069_inner_position_frames import build_upload_frames
+frames = build_upload_frames([
+    (1, (255, 0, 0)), (2, (0, 255, 0)), (4, (0, 0, 255)),
+])
+```
+
+Exact geverifieerd uploadpad: A3 command58, zes uploadframes, daarna afzonderlijk
+activatie330504F046000100 voor de gebruikte opgeslagen effectslot. Een andere
+slotkeuze is niet algemeen bewezen. Elke proef herstelde het opgeslagen looplicht
+met beide bevestigingen. Op verzoek duren volgende lichtproeven60 seconden.
+Geen camera gebruikt. Vervolg: ruimtelijke begrenzing of een andere bewezen
+transportvorm vinden die één interne positie op één gekozen paneel kan selecteren.
